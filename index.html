@@ -175,25 +175,76 @@
 
     footer{ padding: 18px 0 40px; color: var(--muted); font-size:12px; }
     a{ color: var(--accent); text-decoration:none; }
+  .hero {
+    text-align: center;
+    padding: 60px 20px 40px 20px;
+}
+
+.atum-title {
+    font-size: 92px;
+    font-weight: 700;
+    letter-spacing: 8px;
+    margin: 0;
+    background: linear-gradient(90deg, #6ee7ff, #a78bfa, #ffffff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow:
+        0 0 25px rgba(110, 231, 255, 0.6),
+        0 0 45px rgba(167, 139, 250, 0.4);
+}
+
+.atum-glow-line {
+    width: 220px;
+    height: 3px;
+    margin: 20px auto;
+    background: linear-gradient(90deg, #6ee7ff, #a78bfa);
+    box-shadow: 0 0 20px rgba(110, 231, 255, 0.6);
+}
+
+.atum-subtitle {
+    font-size: 20px;
+    color: #cfdcff;
+    letter-spacing: 2px;
+    margin: 10px 0;
+}
+
+.atum-powered {
+    font-size: 16px;
+    color: #9fb0d0;
+    margin-bottom: 15px;
+}
+
+.atum-principle {
+    font-size: 15px;
+    color: #e9f1ff;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
   </style>
 </head>
 <body>
 <header>
-  <div class="wrap">
-    <div class="topbar">
-      <div class="brand">
-        <div class="logo" aria-hidden="true"></div>
-        <div>
-          <h1 class="title">ATUM — Micro + Macro (THOT)</h1>
-          <div class="subtitle">Frontend que carga ZIP desde el repo y ejecuta motor en backend.</div>
-        </div>
-      </div>
-      <div class="pill">
-        <span class="dot" id="backendDot"></span>
-        <span id="backendLabel" class="mono">Backend: no verificado</span>
-      </div>
-    </div>
-  </div>
+  <header class="hero">
+
+  <h1 class="atum-title">ATUM</h1>
+
+  <div class="atum-glow-line"></div>
+
+  <p class="atum-subtitle">
+    Unified Micro–Macro Physical Engine
+  </p>
+
+  <p class="atum-powered">
+    Powered by THOT
+  </p>
+
+  <p class="atum-principle">
+    Una sola constante universal.
+    Sin parámetros libres. Sin ajustes manuales.
+  </p>
+
+</header>
 </header>
 
 <main>
