@@ -1,4 +1,4 @@
-const BASE = "https://TU-SERVICIO.onrender.com"; // <-- tu Render
+const BASE = https://"thot-engine.onrender.com/health; "// <-- tu Render
 const URL_COMPUTE = `${BASE}/compute`;
 const URL_GLOBAL  = `${BASE}/global_rms`;
 const URL_DWARFS  = `${BASE}/dwarfs`;
@@ -144,4 +144,5 @@ function drawBar(divId, title, items){
   Plotly.newPlot(divId, [
     { x, y, type:"bar", orientation:"h", name:"RMS" }
   ], { title, xaxis:{title:"RMS (km/s)"}, margin:{l:220} });
+
 }
