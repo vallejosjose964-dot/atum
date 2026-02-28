@@ -1,0 +1,753 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Millennium Falcon — SPARC Galaxies & LoCuSS Clusters (Browser Tool)</title>
+
+  <!-- Sci-fi font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Plotly + JSZip -->
+  <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+
+  <style>
+    :root{
+      --bg0:#02030a; --bg1:#070a16;
+      --card:rgba(255,255,255,.075);
+      --stroke:rgba(255,255,255,.18);
+      --text:rgba(240,246,255,.92);
+      --muted:rgba(240,246,255,.68);
+      --muted2:rgba(240,246,255,.52);
+      --ok:#27f2c3; --bad:#ff5470;
+      --glow:rgba(120,210,255,.45);
+      --glow2:rgba(200,120,255,.30);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; color:var(--text);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+      background:
+        radial-gradient(1200px 800px at 18% 12%, rgba(90,190,255,.18), transparent 60%),
+        radial-gradient(900px 700px at 84% 16%, rgba(210,110,255,.13), transparent 62%),
+        radial-gradient(900px 700px at 55% 92%, rgba(100,255,220,.08), transparent 60%),
+        linear-gradient(180deg,var(--bg0),var(--bg1));
+      overflow-x:hidden;
+    }
+
+    /* Space background: galaxies + cluster halos + ship trail (inline SVG) */
+    .space{
+      position:fixed; inset:0; pointer-events:none;
+      opacity:.56;
+      background-image:url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' width='1600' height='1000' viewBox='0 0 1600 1000'>\
+<defs>\
+<radialGradient id='galA' cx='50%' cy='50%' r='55%'>\
+<stop offset='0' stop-color='%23ffffff' stop-opacity='0.24'/>\
+<stop offset='40%' stop-color='%237ad2ff' stop-opacity='0.14'/>\
+<stop offset='100%' stop-color='%23000000' stop-opacity='0'/>\
+</radialGradient>\
+<radialGradient id='galB' cx='50%' cy='50%' r='55%'>\
+<stop offset='0' stop-color='%23ffffff' stop-opacity='0.20'/>\
+<stop offset='38%' stop-color='%23c878ff' stop-opacity='0.12'/>\
+<stop offset='100%' stop-color='%23000000' stop-opacity='0'/>\
+</radialGradient>\
+<radialGradient id='halo' cx='50%' cy='50%' r='60%'>\
+<stop offset='0' stop-color='%23ffffff' stop-opacity='0.08'/>\
+<stop offset='55%' stop-color='%23ffffff' stop-opacity='0.02'/>\
+<stop offset='100%' stop-color='%23000000' stop-opacity='0'/>\
+</radialGradient>\
+<linearGradient id='trail' x1='0' y1='0' x2='1' y2='0'>\
+<stop offset='0' stop-color='%237ad2ff' stop-opacity='0'/>\
+<stop offset='55%' stop-color='%237ad2ff' stop-opacity='0.22'/>\
+<stop offset='100%' stop-color='%23c878ff' stop-opacity='0.12'/>\
+</linearGradient>\
+<filter id='blur8'><feGaussianBlur stdDeviation='8'/></filter>\
+<filter id='blur14'><feGaussianBlur stdDeviation='14'/></filter>\
+</defs>\
+<rect width='1600' height='1000' fill='transparent'/>\
+<g fill='%23ffffff' opacity='0.24'>\
+<circle cx='71' cy='73' r='1.2'/> <circle cx='183' cy='109' r='0.9'/> <circle cx='265' cy='52' r='0.8'/> <circle cx='338' cy='146' r='1.0'/>\
+<circle cx='418' cy='88' r='1.1'/> <circle cx='512' cy='132' r='0.7'/> <circle cx='603' cy='70' r='0.9'/> <circle cx='690' cy='156' r='0.8'/>\
+<circle cx='781' cy='92' r='1.0'/> <circle cx='862' cy='61' r='0.7'/> <circle cx='955' cy='141' r='1.2'/> <circle cx='1040' cy='87' r='0.8'/>\
+<circle cx='1141' cy='52' r='0.9'/> <circle cx='1248' cy='118' r='1.1'/> <circle cx='1362' cy='71' r='0.7'/> <circle cx='1501' cy='129' r='1.0'/>\
+<circle cx='110' cy='310' r='0.8'/> <circle cx='240' cy='280' r='1.1'/> <circle cx='355' cy='330' r='0.7'/> <circle cx='505' cy='290' r='0.9'/>\
+<circle cx='640' cy='320' r='1.2'/> <circle cx='790' cy='275' r='0.8'/> <circle cx='910' cy='338' r='0.9'/> <circle cx='1060' cy='300' r='1.1'/>\
+<circle cx='1210' cy='332' r='0.7'/> <circle cx='1360' cy='290' r='1.0'/> <circle cx='1500' cy='320' r='0.8'/>\
+<circle cx='95' cy='720' r='0.9'/> <circle cx='210' cy='690' r='0.8'/> <circle cx='330' cy='770' r='1.1'/> <circle cx='470' cy='705' r='0.7'/>\
+<circle cx='610' cy='780' r='1.2'/> <circle cx='760' cy='700' r='0.8'/> <circle cx='910' cy='760' r='1.0'/> <circle cx='1060' cy='710' r='0.9'/>\
+<circle cx='1210' cy='790' r='0.8'/> <circle cx='1370' cy='720' r='1.1'/> <circle cx='1510' cy='780' r='0.7'/>\
+</g>\
+<g filter='url(%23blur14)' opacity='0.98'>\
+<ellipse cx='280' cy='210' rx='250' ry='150' fill='url(%23galA)'/>\
+<ellipse cx='1220' cy='240' rx='300' ry='170' fill='url(%23galB)'/>\
+<ellipse cx='820' cy='780' rx='360' ry='200' fill='url(%23galA)'/>\
+</g>\
+<g filter='url(%23blur8)' opacity='0.98'>\
+<circle cx='520' cy='520' r='240' fill='url(%23halo)'/>\
+<circle cx='1040' cy='560' r='280' fill='url(%23halo)'/>\
+</g>\
+<path d='M 80 880 C 420 650, 760 640, 1120 380 C 1300 250, 1450 220, 1560 180' stroke='url(%23trail)' stroke-width='10' fill='none' opacity='0.58'/>\
+<path d='M 120 900 C 460 680, 780 660, 1150 410 C 1320 280, 1470 240, 1580 190' stroke='url(%23trail)' stroke-width='4' fill='none' opacity='0.48'/>\
+</svg>");
+      background-size:cover;
+      background-position:center;
+      mix-blend-mode:screen;
+      filter:saturate(1.30) contrast(1.12);
+    }
+
+    .wrap{max-width:1320px;margin:0 auto;padding:28px 16px 74px; position:relative}
+    .top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:14px}
+    h1{
+      margin:0;
+      font-family:'Orbitron',system-ui;
+      font-size:46px;
+      letter-spacing:1.7px;
+      text-transform:uppercase;
+      text-shadow:0 0 40px var(--glow), 0 0 80px rgba(120,210,255,.14);
+      line-height:1.02;
+    }
+    .badge{
+      display:inline-flex;width:max-content;
+      padding:7px 12px;border-radius:999px;
+      border:1px solid rgba(255,255,255,.18);
+      background:rgba(255,255,255,.06);
+      font-family:'Orbitron',system-ui;
+      font-size:12px; letter-spacing:1.15px;
+      color:rgba(240,246,255,.78);
+      box-shadow:0 0 26px rgba(120,210,255,.10);
+      margin-top:6px;
+    }
+    .sub{color:var(--muted); font-size:16px; max-width:980px; line-height:1.35}
+
+    .nav{display:flex;gap:10px;flex-wrap:wrap}
+    .pill{
+      border:1px solid var(--stroke);
+      background:rgba(255,255,255,.05);
+      color:rgba(240,246,255,.86);
+      padding:10px 14px;
+      border-radius:999px;
+      cursor:pointer;
+      font-weight:1000;
+      user-select:none;
+      font-size:14px;
+      letter-spacing:.35px;
+      transition:transform .08s ease, background .15s ease, border-color .15s ease, box-shadow .15s ease;
+    }
+    .pill:hover{transform:translateY(-1px); border-color:rgba(255,255,255,.30)}
+    .pill.active{
+      background:linear-gradient(90deg, rgba(120,210,255,.34), rgba(200,120,255,.22));
+      box-shadow:0 0 34px rgba(120,210,255,.16);
+      color:rgba(240,246,255,.96);
+    }
+
+    .layout{display:grid; grid-template-columns: 480px 1fr; gap:14px}
+    @media (max-width: 1080px){ .layout{grid-template-columns:1fr} }
+
+    .card{
+      border:1px solid var(--stroke);
+      background:var(--card);
+      border-radius:20px;
+      padding:16px;
+      box-shadow:0 14px 80px rgba(0,0,0,.40);
+      backdrop-filter:blur(10px);
+    }
+    .card h2{margin:0 0 8px; font-size:19px; letter-spacing:.4px}
+    .mini{color:var(--muted); font-size:14px; line-height:1.35}
+    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; color:rgba(240,246,255,.86)}
+    label{display:block; margin-top:10px; font-size:14px; color:var(--muted)}
+    input,select,button{
+      width:100%;
+      padding:12px 12px;
+      margin-top:8px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.18);
+      background: rgba(10,14,24,.62);
+      color: rgba(240,246,255,.92);
+      outline:none;
+      font-size:16px;
+    }
+    button{
+      cursor:pointer;
+      font-weight:1000;
+      letter-spacing:.6px;
+      transition: transform .08s ease, border-color .15s ease, box-shadow .15s ease, filter .15s ease;
+      user-select:none;
+      position:relative;
+      overflow:hidden;
+      text-transform:uppercase;
+    }
+    button:hover{transform:translateY(-1px); border-color:rgba(255,255,255,.32); filter:saturate(1.12)}
+    button:disabled{opacity:.55; cursor:not-allowed; filter:none; transform:none}
+    .primary{
+      background: linear-gradient(90deg, rgba(120,210,255,.34), rgba(200,120,255,.22));
+      box-shadow:0 0 44px rgba(120,210,255,.16);
+    }
+    .primary::after{
+      content:"";
+      position:absolute; inset:-60% -60%;
+      background: radial-gradient(circle at 28% 22%, rgba(255,255,255,.20), transparent 45%);
+      transform: rotate(10deg);
+      opacity:.85;
+      pointer-events:none;
+    }
+    .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+    .row > button{flex:1; min-width:170px}
+    .hr{height:1px; background:rgba(255,255,255,.12); margin:12px 0}
+    .kpi{display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-top:10px}
+    @media (max-width: 680px){ .kpi{grid-template-columns:1fr} }
+    .kpi .box{border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:10px 12px;background: rgba(255,255,255,.03)}
+    .kpi b{display:block; font-size:14px; color:rgba(240,246,255,.78); margin-bottom:4px}
+    .kpi span{font-size:16px}
+    .plotcard{padding:10px 12px}
+    #plotSparc,#plotLocuss{height:820px}
+    #plotGlobal{height:820px}
+
+    footer{
+      position:relative;
+      padding:18px 16px 24px;
+      text-align:center;
+      color:rgba(240,246,255,.60);
+      font-size:13px;
+    }
+
+    /* ===== PREMIUM ADD-ONS ===== */
+    .heroRow{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-top:12px;
+      align-items:stretch;
+    }
+
+    .heroKpis{
+      flex: 1 1 520px;
+      border:1px solid rgba(255,255,255,.14);
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03));
+      border-radius:18px;
+      padding:12px 14px;
+      box-shadow: 0 18px 90px rgba(0,0,0,.34);
+      backdrop-filter: blur(10px);
+    }
+
+    .heroKpis .grid{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:10px;
+    }
+    @media (max-width: 720px){
+      .heroKpis .grid{ grid-template-columns:1fr; }
+    }
+
+    .heroKpis .k{
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.03);
+      border-radius:14px;
+      padding:10px 12px;
+    }
+    .heroKpis .k b{
+      display:block;
+      font-size:12px;
+      letter-spacing:.35px;
+      color: rgba(240,246,255,.72);
+      margin-bottom:6px;
+    }
+    .heroKpis .k span{
+      font-size:15px;
+      color: rgba(240,246,255,.92);
+    }
+
+    .quickLinks{
+      margin-top:10px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .quickLinks a{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 12px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.05);
+      text-decoration:none;
+      color: rgba(240,246,255,.90);
+      font-weight:950;
+      letter-spacing:.25px;
+      transition: transform .10s ease, border-color .18s ease, box-shadow .18s ease, filter .18s ease;
+    }
+    .quickLinks a:hover{
+      transform: translateY(-1px);
+      border-color: rgba(255,255,255,.30);
+      box-shadow: 0 14px 50px rgba(0,0,0,.22);
+      filter:saturate(1.10);
+    }
+
+    .heroShot{
+      flex: 1 1 360px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.03);
+      border-radius:18px;
+      padding:10px;
+      box-shadow: 0 18px 90px rgba(0,0,0,.34);
+      backdrop-filter: blur(10px);
+      overflow:hidden;
+      position:relative;
+    }
+    .heroShot img{
+      width:100%;
+      height:auto;
+      display:block;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      opacity:.96;
+    }
+    .heroShot .cap{
+      margin-top:8px;
+      color: rgba(240,246,255,.62);
+      font-size:12.5px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="space"></div>
+
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <h1>Millennium Falcon</h1>
+
+        <div class="badge">SPARC (175) · LoCuSS (40) · One-Click Export · Auto-Load Ready</div>
+
+        <div class="sub">
+          <b>What to do:</b> choose <b>SPARC</b> or <b>LoCuSS</b>, set the input constant, and click <b>Run/Compute</b>.<br/>
+          <b>What you get:</b> predicted curves/outputs + error metrics, with <b>PNG</b> and <b>CSV</b> export in one click.<br/>
+          <span style="color:var(--muted2)">Macro runs in your browser. Micro runs on backend (protected). SPARC dataset auto-loads from this repository.</span>
+          <br/>
+          <span style="color:var(--muted2)">
+            <b>Key point:</b> <br/> single global constant applied to the full sample — <b>no per-object fitting</b>, no individual tuning.
+          </span>
+        </div>
+
+        <!-- PREMIUM: demo notice + quick links + KPI + screenshot -->
+        <div class="heroRow">
+
+          <div class="heroKpis">
+            <div class="mini" style="margin-bottom:10px">
+              <b>Live demo:</b> on page load, the tool automatically runs the first valid SPARC galaxy.
+              <span style="color:var(--muted2)">If auto-load fails, use Manual load or Downloads.</span>
+            </div>
+
+            <div class="grid">
+              <div class="k">
+                <b>Dataset</b>
+                <span id="heroDataset">Auto-loading…</span>
+              </div>
+              <div class="k">
+                <b>Selected</b>
+                <span id="heroSelected">—</span>
+              </div>
+              <div class="k">
+                <b>RMS</b>
+                <span id="heroRms">—</span>
+              </div>
+            </div>
+
+            
+          </div>
+
+          </div>
+
+        </div>
+      </div>
+
+      <div class="nav">
+        <div class="pill active" data-view="sparc">SPARC Galaxies</div>
+        <div class="pill" data-view="locuss">LoCuSS Clusters</div>
+        <div class="pill" data-view="dwarfs">Dwarfs</div>
+        <div class="pill" data-view="downloads">Downloads</div>
+        <div class="pill" data-view="global">Global Tests</div>
+      </div>
+    </div>
+
+    <!-- SPARC -->
+    <section id="view-sparc">
+      <div class="layout">
+        <div class="card">
+          <h2>SPARC Rotation Curves (175)</h2>
+          <div class="mini">Auto-load is ON. Manual load remains as fallback.</div>
+          <div class="mini" style="margin-top:6px"><b>Quickstart:</b> (1) Pick a galaxy → (2) Click <b>Run</b>.</div>
+
+          <div id="zipStatus" class="mini" style="margin-top:10px">Loading SPARC database…</div>
+<div id="lawBanner" style="margin-top:10px;padding:10px 12px;border:1px solid rgba(255,255,255,.12);border-radius:12px;background:rgba(0,0,0,.25);font-size:14px;line-height:1.35;display:none;"></div>
+
+          <label>Manual load (Rotmod_LTG.zip)</label>
+          <input id="sparcFile" type="file" accept=".zip"/>
+          <div class="mini" id="perfOut" style="margin-top:6px"></div>
+
+          <label>Galaxy</label>
+          <select id="galaxySelect" disabled></select>
+
+          <label>τ (seconds) → mapped to a⋆ (galactic scale)</label>
+          <input id="tau" type="number" step="any" value="1.2831e-25"/>
+
+          <label>Optional: override a⋆ (m/s²)</label>
+          <input id="astarOverride" type="number" step="any" placeholder=""/>
+
+          <div class="row" style="margin-top:10px">
+            <button class="primary" id="btnRunGalaxy" disabled>Run Galaxy</button>
+            <button id="btnLoadZip" disabled>Load ZIP</button>
+            <button id="btnCSV" disabled>Download CSV</button>
+            <button id="btnPNG" disabled>Download PNG</button>
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="kpi">
+            <div class="box"><b>Galaxy</b><span id="kpiGalaxy">—</span></div>
+            <div class="box"><b>RMS (km/s)</b><span id="kpiRMS">—</span></div>
+            <div class="box"><b>a⋆ (m/s²)</b><span id="kpiAstar">—</span></div>
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="mini">
+            <b>Definition</b><br/>
+            <span class="mono">Vbar² = Vgas² + Vdisk² + Vbulge²</span><br/>
+            <span class="mono">aN(r) = Vbar² / r</span><br/>
+            <span class="mono">a(r) = √(aN·a⋆)</span><br/>
+            <span class="mono">Vpred(r) = √(r·a)</span>
+          </div>
+        </div>
+
+        <div class="card plotcard"><div id="plotSparc"></div></div>
+      </div>
+    </section>
+
+    <!-- LoCuSS -->
+    <section id="view-locuss" style="display:none">
+      <div class="layout">
+        <div class="card">
+          <h2>LoCuSS R500 Tester (40)</h2>
+          <div class="mini">Compute ξ and ξtop, then export plot/table.</div>
+          <div class="mini" style="margin-top:6px"><b>Quickstart:</b> (1) Choose cluster → (2) Click <b>Compute</b>.</div>
+
+          <label>a⋆ (m/s²)</label>
+          <input id="locussAstar" type="number" step="any" value="1.55e-10"/>
+
+          <label>ε (global slope removal)</label>
+          <input id="locussEps" type="number" step="any" value="0.704"/>
+
+          <label>Cluster</label>
+          <select id="clusterSelect"></select>
+
+          <div class="row" style="margin-top:10px">
+            <button class="primary" id="btnRunLocuss">Compute</button>
+            <button id="btnLocussCSV">Download CSV</button>
+            <button id="btnLocussPNG">Download PNG</button>
+            <button id="btnReset">Reset defaults</button>
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="row">
+            <button id="btnHistXi">Hist ξ</button>
+            <button id="btnHistTop">Hist ξtop</button>
+            <button id="btnXiVsM">ξ vs MWL</button>
+            <button id="btnTopVsM">ξtop vs MWL</button>
+          </div>
+
+          <div class="hr"></div>
+          <div class="mini" id="locussOut"></div>
+        </div>
+
+        <div class="card plotcard"><div id="plotLocuss"></div></div>
+      </div>
+    </section>
+
+    <!-- ===== Dwarfs (McConnachie / Wolf) ===== -->
+<section id="view-dwarfs" style="display:none; margin-top:16px">
+  <h2 style="margin:10px 0">Dwarf Galaxies</h2>
+
+  <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center">
+    <input id="dwarfFile" type="file" accept=".csv,.txt,.dat" />
+
+    <button id="btnRunDwarfs" disabled>Run Dwarfs</button>
+    <button id="btnDwarfsCSV" disabled>Export Dwarfs CSV</button>
+    <button id="btnDwarfsPNG" disabled>Export Dwarfs PNG</button>
+  </div>
+
+  <div id="dwarfsOut" style="margin-top:10px"></div>
+
+  <div id="plotDwarfs" style="height:520px; margin-top:10px"></div>
+</section>
+
+<!-- Downloads -->
+    <section id="view-downloads" style="display:none">
+      <div class="card">
+        <h2>Downloads</h2>
+        <div class="mini">
+          <b>Needed file (optional):</b> <span class="mono">Rotmod_LTG.zip</span><br/>
+          If auto-load fails, download the SPARC zip and load it manually using the file picker.<br/>
+          <span style="color:var(--muted2)">Tip: keep the zip in the repo root for best auto-load behavior.</span>
+          <br/><br/>
+          <span style="color:rgba(240,246,255,.60)">
+            All computations are performed locally in your browser. No data is sent to any server.
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Global Tests -->
+    <section id="view-global" style="display:none">
+      <div class="layout">
+        <div class="card">
+          <h2>Global Tests</h2>
+          <div class="mini">
+            One-click global views: <b>BTFR</b> (SPARC 175) and <b>LoCuSS</b> (40).
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="row">
+  <button id="btnBTFR" type="button">Build BTFR (175)</button>
+</div>
+
+
+            <button class="primary" id="btnGlobalRMS">Global RMS (175)</button>
+          <button id="btnGlobalCSV" type="button" disabled>Download Global CSV</button>
+
+
+
+            <button id="btnLocussGlobal">LoCuSS: Mdyn vs Mbar</button>
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="mini" id="globalOut"></div>
+        </div>
+
+        <div class="card plotcard"><div id="plotGlobal"></div></div>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="mini" style="padding:12px;border:1px solid rgba(255,255,255,.14);border-radius:16px;background:rgba(255,255,255,.03)">
+        <b>Falsifiability:</b> If you find an object that does not match using <b>one global constant</b> (no per-object fitting), the claim is falsified.
+      </div>
+    </section>
+
+
+  </div><!-- /wrap -->
+
+  <footer>
+    © 2026 José Fabián Vallejos — Argentina<br/>
+    Born in Argentina, created for humanity<br/>
+    <span style="color:rgba(240,246,255,.45)">Browser-only tool for SPARC galaxies & LoCuSS clusters</span>
+    <br/>
+    <span style="color:rgba(240,246,255,.40)">
+      Educational & exploratory tool. Uses public SPARC and LoCuSS datasets.
+    </span>
+  </footer>
+
+  
+  <script>
+    (function(){
+      const pills = Array.from(document.querySelectorAll('.pill[data-view]'));
+      const views = {
+        sparc: document.getElementById('view-sparc'),
+        locuss: document.getElementById('view-locuss'),
+        dwarfs: document.getElementById('view-dwarfs'),
+        downloads: document.getElementById('view-downloads'),
+        global: document.getElementById('view-global'),
+      };
+      function show(name){
+        pills.forEach(p=>p.classList.toggle('active', p.dataset.view===name));
+        Object.entries(views).forEach(([k,el])=>{ if(el) el.style.display = (k===name ? '' : 'none'); });
+        setTimeout(()=>{
+          ['plotSparc','plotLocuss','plotDwarfs','plotGlobal'].forEach(id=>{
+            const el = document.getElementById(id);
+            if(el && window.Plotly){ try{ Plotly.Plots.resize(el);}catch(e){} }
+          });
+        }, 80);
+      }
+      pills.forEach(p=>p.addEventListener('click', ()=>show(p.dataset.view)));
+      show('sparc');
+    })();
+  </script>
+<script>
+// ==========================================================
+// Millennium Falcon — Inline SPARC CSV backend (no conflicts)
+// - FileReader + robust parser (comma OR whitespace)
+// - QUOT/OHM motor: geff = sqrt(gN^2 + gN*a*)
+// - Reads UI inputs: tau + astarOverride (override wins)
+// ==========================================================
+window.MF = window.MF || {};
+(function(MF){
+  const KPC_TO_M = 3.085677581e19;
+  MF.SPARC_ROWS = [];
+
+  function el(id){ return document.getElementById(id); }
+
+  MF.readTextFile = function(file){
+    return new Promise((resolve,reject)=>{
+      const reader = new FileReader();
+      reader.onload = e => resolve(e.target.result);
+      reader.onerror = err => reject(err);
+      reader.readAsText(file);
+    });
+  };
+
+  MF.parseSPARC = function(text){
+    const lines = text.split(/\r?\n/).filter(l=>l.trim() && !l.trim().startsWith("#"));
+    MF.SPARC_ROWS = [];
+    for(const line of lines){
+      const trimmed = line.trim();
+      const parts = trimmed.includes(",") ? trimmed.split(",") : trimmed.split(/\s+/);
+      const nums = parts.map(s=>Number(s));
+      if(!isFinite(nums[0]) || !isFinite(nums[1])) continue;
+      MF.SPARC_ROWS.push({
+        r: nums[0],
+        vobs: nums[1],
+        vgas: nums[2] ?? 0,
+        vdisk: nums[3] ?? 0,
+        vbulge: nums[4] ?? 0
+      });
+    }
+
+    // Enable run/export
+    const ok = MF.SPARC_ROWS.length > 0;
+    if (el("btnRunGalaxy")) el("btnRunGalaxy").disabled = !ok;
+    if (el("btnCSV")) el("btnCSV").disabled = !ok;
+    if (el("btnPNG")) el("btnPNG").disabled = !ok;
+
+    if (el("kpiGalaxy")) el("kpiGalaxy").textContent = ok ? "Loaded (CSV)" : "—";
+    if (el("heroDataset")) el("heroDataset").textContent = ok ? "Manual CSV" : "—";
+    return MF.SPARC_ROWS.length;
+  };
+
+  function getAstar(){
+    const override = parseFloat(el("astarOverride")?.value || "");
+    if (isFinite(override) && override>0) return override;
+    return 1.5e-10;
+  }
+
+  MF.predictVel = function(){
+    if(!MF.SPARC_ROWS.length) return;
+
+    const ML = 0.51;   // global
+    const ASTAR = getAstar();
+
+    const rads=[], obs=[], pred=[];
+    for(const p of MF.SPARC_ROWS){
+      const Vbar2 = (p.vgas*p.vgas) + ML*((p.vdisk*p.vdisk) + (p.vbulge*p.vbulge));
+      const r_m = p.r * KPC_TO_M;
+      const gN = (Vbar2 * 1e6) / r_m;          // (km/s)^2 -> (m/s)^2
+      const geff = Math.sqrt(gN*gN + gN*ASTAR);
+      const v_kms = Math.sqrt(r_m*geff)/1000;
+
+      rads.push(p.r);
+      obs.push(p.vobs);
+      pred.push(v_kms);
+    }
+
+    MF.plotGalaxy(rads, obs, pred);
+    MF.updateRMS(obs, pred, ASTAR);
+  };
+
+  MF.plotGalaxy = function(r, o, p){
+    if(!window.Plotly) return;
+    Plotly.newPlot("plotSparc",[
+      {x:r, y:o, name:"Observed", mode:"lines+markers"},
+      {x:r, y:p, name:"QUOT", mode:"lines"}
+    ], {
+      margin:{l:50,r:20,t:25,b:45},
+      paper_bgcolor:"rgba(0,0,0,0)",
+      plot_bgcolor:"rgba(0,0,0,0)",
+      xaxis:{title:"r (kpc)"},
+      yaxis:{title:"V (km/s)"}
+    });
+  };
+
+  MF.updateRMS = function(o, p, ASTAR){
+    let s=0;
+    for(let i=0;i<o.length;i++) s += (o[i]-p[i])*(o[i]-p[i]);
+    const rms = Math.sqrt(s/o.length);
+
+    if (el("kpiRMS")) el("kpiRMS").textContent = rms.toFixed(2);
+    if (el("heroRms")) el("heroRms").textContent = rms.toFixed(2) + " km/s";
+    if (el("kpiAstar")) el("kpiAstar").textContent = ASTAR.toExponential(3);
+    if (el("heroSelected")) el("heroSelected").textContent = el("galaxySelect")?.value || "CSV manual";
+  };
+
+  // Wire UI
+  const sparcFile = el("sparcFile");
+  if (sparcFile){
+    sparcFile.addEventListener("change", async (e)=>{
+      const file = e.target.files && e.target.files[0];
+      if(!file) return;
+      const txt = await MF.readTextFile(file);
+      MF.parseSPARC(txt);
+    });
+  }
+
+  if (el("btnRunGalaxy")){
+    el("btnRunGalaxy").addEventListener("click", MF.predictVel);
+  }
+
+  if (el("btnPNG")){
+    el("btnPNG").addEventListener("click", async ()=>{
+      if(!window.Plotly) return;
+      try{ await Plotly.downloadImage("plotSparc", {format:"png", filename:"millennium_falcon_sparc"}); }catch(e){}
+    });
+  }
+
+  if (el("btnCSV")){
+    el("btnCSV").addEventListener("click", ()=>{
+      if(!MF.SPARC_ROWS.length) return;
+      const header = "r_kpc,vobs_kms,vgas_kms,vdisk_kms,vbulge_kms\n";
+      const body = MF.SPARC_ROWS.map(p=>[p.r,p.vobs,p.vgas,p.vdisk,p.vbulge].join(",")).join("\n");
+      const blob = new Blob([header+body], {type:"text/csv"});
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "sparc_loaded.csv";
+      a.click();
+      setTimeout(()=>URL.revokeObjectURL(a.href), 600);
+    });
+  }
+})(window.MF);
+</script>
+
+<!-- Your app logic -->
+ <!-- Optional external app.js. If kept, ensure it does NOT redefine MF.* or bind duplicate handlers. -->
+  <section id="ipNotice" style="margin:28px auto 10px; max-width:1100px; padding:16px 18px; border-top:1px solid rgba(255,255,255,.12); opacity:0.95;">
+  <h3 style="margin:0 0 8px; font-size:16px;">Propiedad Intelectual &amp; Uso</h3>
+  <p style="margin:0 0 8px; font-size:13px; line-height:1.45;">
+    © <span id="ipYear"></span> José Fabián Vallejos. Este software, su interfaz, el modelo matemático implementado, y la metodología de cálculo asociada
+    constituyen obra original y están protegidos por derechos de autor (Argentina – Ley 11.723) y convenios internacionales.
+  </p>
+  <p style="margin:0 0 8px; font-size:13px; line-height:1.45;">
+    <strong>INPI Argentina:</strong> Para registro/depósito y constancias formales, completa aquí tus datos cuando corresponda:
+    <em>Expediente/Trámite INPI:</em> <span style="border-bottom:1px dotted rgba(255,255,255,.35); padding:0 6px;">__________</span>
+  </p>
+  <p style="margin:0; font-size:12.5px; line-height:1.45; opacity:0.9;">
+    Prohibida la reproducción, re-implementación, ingeniería inversa o uso comercial sin autorización escrita del autor.
+    Para licencias o acuerdos: reemplaza este texto con tu contacto oficial.
+  </p>
+</section>
+<script>
+  try{ document.getElementById("ipYear").textContent = new Date().getFullYear(); }catch(e){}
+</script>
+
+
+<script>
+(function(){"use strict";var d="InVzZSBzdHJpY3QiOyB3aW5kb3cuX19NRl9WRVJTSU9OX189Ik1GdjExX0NMRUFSX0NBTUJfMjAyNi0wMi0yMSI7IGNvbnNvbGUubG9nKCJbTUZdIiwgd2luZG93Ll9fTUZfVkVSU0lPTl9fKTsgY29uc3QgJD0oaWQpPT5kb2N1bWVudC5nZXRFbGVtZW50QnlJZChpZCk7IGNvbnN0IGVsPW5ldyBQcm94eSh7fSwge2dldChfLGspe3JldHVybiAkKGspO319KTsgY29uc3QgQ09OU1Q9eyBNTF9VTklWOjAuNTEsIEFTVEFSOjEuNWUtMTAsIEtQQ19UT19NOjMuMDg1Njc3NTgxNDkxMzY3ZTE5LCBLTVBTX1RPX01QUzoxMDAwIH07IGNvbnN0IEtFUk5FTF9NT0RFPSJTUVJUIjsgY29uc3QgSEk9eyBWX0hJOjUuMCwgU0lHTUFfSEk6OC4wLCBnZXQgQygpeyByZXR1cm4gKHRoaXMuVl9ISS90aGlzLlNJR01BX0hJKSoqMjsgfSwgZ2V0IHNxcnRDKCl7IHJldHVybiBNYXRoLnNxcnQodGhpcy5DKTsgfSB9OyBjb25zdCBzdGF0ZT17emlwOm51bGwsIGZpbGVzOltdLCBnYWxheGllczpbXSwgY3VycmVudEdhbGF4eTpudWxsLCBsYXN0Q1NWOm51bGwsIGxhc3RHbG9iYWxDU1Y6bnVsbCwgbGFzdER3YXJmc0NTVjpudWxsLCBsYXN0UE5HVGFyZ2V0Om51bGx9OyBmdW5jdGlvbiBzZXRUZXh0KGlkLHR4dCl7Y29uc3Qgbj0kKGlkKTsgaWYobikgbi50ZXh0Q29udGVudD10eHQ7fSBmdW5jdGlvbiBlbmFibGUoaWQsb24pe2NvbnN0IG49JChpZCk7IGlmKG4pIG4uZGlzYWJsZWQ9IW9uO30gZnVuY3Rpb24gc2FmZU51bSh4KXtjb25zdCB2PU51bWJlcih4KTsgcmV0dXJuIE51bWJlci5pc0Zpbml0ZSh2KT92Ok5hTjt9IGZ1bmN0aW9uIHJtcyhhcnIpe2xldCBzPTAsbj0wOyBmb3IoY29uc3QgdiBvZiBhcnIpe2lmKE51bWJlci5pc0Zpbml0ZSh2KSl7cys9dip2OyBuKys7fX0gcmV0dXJuIG4/TWF0aC5zcXJ0KHMvbik6TmFOO30gZnVuY3Rpb24gdmJhcjIocm93KXsgY29uc3Qgdmdhcz1yb3cuVmdhcywgdmRpc2s9cm93LlZkaXNrLCB2YnVsPXJvdy5WYnVsOyBpZighW3ZnYXMsdmRpc2ssdmJ1bF0uZXZlcnkoTnVtYmVyLmlzRmluaXRlKSkgcmV0dXJuIE5hTjsgcmV0dXJuIHZnYXMqdmdhcyArIENPTlNULk1MX1VOSVYqKHZkaXNrKnZkaXNrICsgdmJ1bCp2YnVsKTsgfSBmdW5jdGlvbiBhTihyb3cpeyBjb25zdCB2YjI9dmJhcjIocm93KTsgY29uc3Qgcj1yb3cuUl9rcGMqQ09OU1QuS1BDX1RPX007IGlmKCFOdW1iZXIuaXNGaW5pdGUodmIyKSB8fCAhKHI+MCkpIHJldHVybiBOYU47IHJldHVybiAodmIyKihDT05TVC5LTVBTX1RPX01QUyoqMikpL3I7IH0gZnVuY3Rpb24gYUtlcm5lbChhTl8sYVN0YXIpeyBpZighKGFOXz4wKSB8fCAhKGFTdGFyPjApKSByZXR1cm4gMDsgaWYoS0VSTkVMX01PREU9PT0iT0hNX0hBTEYiKSByZXR1cm4gMC41KihhTl8rTWF0aC5zcXJ0KGFOXyphTl8rNCphTl8qYVN0YXIpKTsgcmV0dXJuIE1hdGguc3FydChhTl8qYU5fICsgYU5fKmFTdGFyKTsgfSBmdW5jdGlvbiBpc0NhbUIobmFtZSl7IHJldHVybiBTdHJpbmcobmFtZXx8IiIpLnRvTG93ZXJDYXNlKCkuaW5jbHVkZXMoImNhbWIiKTsgfSBmdW5jdGlvbiBnZXRBc3RhcigpeyBjb25zdCB1c2VyPXNhZmVOdW0oZWwuYXN0YXJPdmVycmlkZT8udmFsdWUpOyByZXR1cm4gKE51bWJlci5pc0Zpbml0ZSh1c2VyKSYmdXNlcj4wKT91c2VyOkNPTlNULkFTVEFSOyB9IGZ1bmN0aW9uIHBhcnNlUm90bW9kVGV4dCh0ZXh0KXsgY29uc3QgbGluZXM9U3RyaW5nKHRleHQpLnNwbGl0KC9ccj9cbi8pLm1hcChsPT5sLnRyaW0oKSkuZmlsdGVyKGw9PmwgJiYgIWwuc3RhcnRzV2l0aCgiIyIpKTsgaWYoIWxpbmVzLmxlbmd0aCkgcmV0dXJuIFtdOyBjb25zdCBoZWFkZXI9L1tBLVphLXpdLy50ZXN0KGxpbmVzWzBdKSA/IGxpbmVzWzBdLnNwbGl0KC9bXHMsXSsvKS5tYXAocz0+cy50cmltKCkpIDogbnVsbDsgY29uc3Qgc3RhcnQ9aGVhZGVyPzE6MDsgY29uc3QgaWR4PShoLG4pPT5oLmZpbmRJbmRleCh4PT54LnRvTG93ZXJDYXNlKCk9PT1uLnRvTG93ZXJDYXNlKCkpOyBjb25zdCByb3dzPVtdOyBmb3IobGV0IGk9c3RhcnQ7aTxsaW5lcy5sZW5ndGg7aSsrKXsgY29uc3QgcD1saW5lc1tpXS5zcGxpdCgvW1xzLF0rLyk7IGlmKHAubGVuZ3RoPDIpIGNvbnRpbnVlOyBsZXQgUl9rcGMsVm9icyxlVm9icyxWZ2FzLFZkaXNrLFZidWw7IGlmKGhlYWRlcil7IGNvbnN0IHBpY2s9KG4sZik9Pntjb25zdCBqPWlkeChoZWFkZXIsbik7IHJldHVybiBzYWZlTnVtKHBbKGo+PTApP2o6Zl0pO307IFJfa3BjPXBpY2soIlIiLDApOyBWb2JzPXBpY2soIlZvYnMiLDEpOyBlVm9icz1waWNrKCJlVm9icyIsMik7IFZnYXM9cGljaygiVmdhcyIsMyk7IFZkaXNrPXBpY2soIlZkaXNrIiw0KTsgVmJ1bD1waWNrKCJWYnVsIiw1KTsgfWVsc2V7IFJfa3BjPXNhZmVOdW0ocFswXSk7IFZvYnM9c2FmZU51bShwWzFdKTsgZVZvYnM9c2FmZU51bShwWzJdKTsgVmdhcz1zYWZlTnVtKHBbM10pOyBWZGlzaz1zYWZlTnVtKHBbNF0pOyBWYnVsPXNhZmVOdW0ocFs1XSk7IH0gaWYoIU51bWJlci5pc0Zpbml0ZShSX2twYyl8fCFOdW1iZXIuaXNGaW5pdGUoVm9icykpIGNvbnRpbnVlOyByb3dzLnB1c2goe1Jfa3BjLFZvYnMsZVZvYnM6TnVtYmVyLmlzRmluaXRlKGVWb2JzKT9lVm9iczpOYU4sVmdhczpOdW1iZXIuaXNGaW5pdGUoVmdhcyk/VmdhczowLFZkaXNrOk51bWJlci5pc0Zpbml0ZShWZGlzayk/VmRpc2s6MCxWYnVsOk51bWJlci5pc0Zpbml0ZShWYnVsKT9WYnVsOjB9KTsgfSByZXR1cm4gcm93czsgfSBmdW5jdGlvbiBjb21wdXRlKG5hbWUscm93cyl7IGNvbnN0IGFTdGFyPWdldEFzdGFyKCk7IHNldFRleHQoImtwaUFzdGFyIiwgYVN0YXIudG9FeHBvbmVudGlhbCgzKSk7IGNvbnN0IGNhbUI9aXNDYW1CKG5hbWUpOyBjb25zdCBmYWN0b3IgPSBjYW1CID8gSEkuQyA6IDEuMDsgY29uc3QgcmVzaWR1YWxzPVtdLCB0YWJsZT1bXTsgZm9yKGNvbnN0IHJvdyBvZiByb3dzKXsgY29uc3QgYU5fPWFOKHJvdyk7IGNvbnN0IGFFZmY9YUtlcm5lbChhTl8sYVN0YXIpOyBjb25zdCByPXJvdy5SX2twYypDT05TVC5LUENfVE9fTTsgY29uc3QgVl9rZXJuZWwgPSBNYXRoLnNxcnQoTWF0aC5tYXgoMCxyKmFFZmYpKS9DT05TVC5LTVBTX1RPX01QUzsgY29uc3QgVl9yZWFsID0gVl9rZXJuZWwgKiBmYWN0b3I7IHRhYmxlLnB1c2goeyAuLi5yb3csIFZfa2VybmVsLCBWX3JlYWwsIEM6IGNhbUIgPyBISS5DIDogIiIsIHNxcnRDOiBjYW1CID8gSEkuc3FydEMgOiAiIiwgY2FtQl9mYWN0b3I6IGNhbUIgPyBmYWN0b3IgOiAiIiwgYU5fbXBzMjphTl8sIGFFZmZfbXBzMjphRWZmIH0pOyBpZihOdW1iZXIuaXNGaW5pdGUoVl9yZWFsKSAmJiBOdW1iZXIuaXNGaW5pdGUocm93LlZvYnMpKSByZXNpZHVhbHMucHVzaChWX3JlYWwtcm93LlZvYnMpOyB9IHJldHVybiB7dGFibGUsIFJNUzpybXMocmVzaWR1YWxzKSwgY2FtQiwgZmFjdG9yfTsgfSBmdW5jdGlvbiB0b0NTVih0YWJsZSl7IGNvbnN0IGNvbHM9WyJSX2twYyIsIlZvYnMiLCJlVm9icyIsIlZnYXMiLCJWZGlzayIsIlZidWwiLCJWX2tlcm5lbCIsIlZfcmVhbCIsIkMiLCJzcXJ0QyIsImNhbUJfZmFjdG9yIiwiYU5fbXBzMiIsImFFZmZfbXBzMiJdOyByZXR1cm4gW2NvbHMuam9pbigiLCIpXS5jb25jYXQodGFibGUubWFwKHI9PmNvbHMubWFwKGM9PihyW2NdPz8iIikpLmpvaW4oIiwiKSkpLmpvaW4oIlxuIik7IH0gZnVuY3Rpb24gZG93bmxvYWRUZXh0KGZpbGVuYW1lLHRleHQpeyBjb25zdCBibG9iPW5ldyBCbG9iKFt0ZXh0XSx7dHlwZToidGV4dC9wbGFpbjtjaGFyc2V0PXV0Zi04In0pOyBjb25zdCB1cmw9VVJMLmNyZWF0ZU9iamVjdFVSTChibG9iKTsgY29uc3QgYT1kb2N1bWVudC5jcmVhdGVFbGVtZW50KCJhIik7IGEuaHJlZj11cmw7IGEuZG93bmxvYWQ9ZmlsZW5hbWU7IGRvY3VtZW50LmJvZHkuYXBwZW5kQ2hpbGQoYSk7IGEuY2xpY2soKTsgYS5yZW1vdmUoKTsgVVJMLnJldm9rZU9iamVjdFVSTCh1cmwpOyB9IGFzeW5jIGZ1bmN0aW9uIGRvd25sb2FkUE5HKHBsb3RJZCl7IGlmKCF3aW5kb3cuUGxvdGx5KSB0aHJvdyBuZXcgRXJyb3IoIlBsb3RseSBub3QgbG9hZGVkIik7IGNvbnN0IGRpdj0kKHBsb3RJZCk7IGNvbnN0IGRhdGFVcmw9YXdhaXQgUGxvdGx5LnRvSW1hZ2UoZGl2LHtmb3JtYXQ6InBuZyIsaGVpZ2h0Ojg1MCx3aWR0aDoxNDAwLHNjYWxlOjJ9KTsgY29uc3QgYT1kb2N1bWVudC5jcmVhdGVFbGVtZW50KCJhIik7IGEuaHJlZj1kYXRhVXJsOyBhLmRvd25sb2FkPWAke3N0YXRlLmN1cnJlbnRHYWxheHl8fHBsb3RJZH0ucG5nYDsgZG9jdW1lbnQuYm9keS5hcHBlbmRDaGlsZChhKTsgYS5jbGljaygpOyBhLnJlbW92ZSgpOyB9IGZ1bmN0aW9uIHByb0xheW91dCh0aXRsZSx4VGl0bGUseVRpdGxlLGxlZnQ9NzApeyByZXR1cm4geyB0aXRsZTp7dGV4dDp0aXRsZSx4OjAuMDIseGFuY2hvcjoibGVmdCJ9LCB4YXhpczp7dGl0bGU6eFRpdGxlLGdyaWRjb2xvcjoicmdiYSgyNTUsMjU1LDI1NSwuMDgpIix6ZXJvbGluZTpmYWxzZX0sIHlheGlzOnt0aXRsZTp5VGl0bGUsZ3JpZGNvbG9yOiJyZ2JhKDI1NSwyNTUsMjU1LC4wOCkiLHplcm9saW5lOmZhbHNlfSwgbWFyZ2luOntsOmxlZnQscjozMCx0OjcwLGI6NTV9LCBwYXBlcl9iZ2NvbG9yOiJyZ2JhKDAsMCwwLDApIiwgcGxvdF9iZ2NvbG9yOiJyZ2JhKDAsMCwwLDApIiwgZm9udDp7ZmFtaWx5OiJzeXN0ZW0tdWksLWFwcGxlLXN5c3RlbSxTZWdvZSBVSSxSb2JvdG8sQXJpYWwiLGNvbG9yOiJyZ2JhKDI0NSwyNDgsMjU1LC45MikifSwgbGVnZW5kOntvcmllbnRhdGlvbjoiaCIseToxLjEyLHg6MC4wMn0gfTsgfSBmdW5jdGlvbiBwcm9Db25maWcoKXtyZXR1cm4ge3Jlc3BvbnNpdmU6dHJ1ZSxkaXNwbGF5bG9nbzpmYWxzZSxzY3JvbGxab29tOnRydWV9O30gZnVuY3Rpb24gcG9wdWxhdGVHYWxheHlTZWxlY3QoKXsgY29uc3Qgc2VsPWVsLmdhbGF4eVNlbGVjdDsgaWYoIXNlbCkgcmV0dXJuOyBzZWwuaW5uZXJIVE1MPSIiOyBmb3IoY29uc3QgZyBvZiBzdGF0ZS5nYWxheGllcyl7Y29uc3Qgbz1kb2N1bWVudC5jcmVhdGVFbGVtZW50KCJvcHRpb24iKTtvLnZhbHVlPWc7by50ZXh0Q29udGVudD1nO3NlbC5hcHBlbmRDaGlsZChvKTt9IHNlbC5kaXNhYmxlZD1zdGF0ZS5nYWxheGllcy5sZW5ndGg9PT0wOyBzZXRUZXh0KCJoZXJvRGF0YXNldCIsIHN0YXRlLmdhbGF4aWVzLmxlbmd0aD9gU1BBUkMgWklQICgke3N0YXRlLmdhbGF4aWVzLmxlbmd0aH0pYDoi4oCUIik7IH0gYXN5bmMgZnVuY3Rpb24gbG9hZFppcEZyb21BcnJheUJ1ZmZlcihhYixsYWJlbCl7IGlmKCF3aW5kb3cuSlNaaXApIHRocm93IG5ldyBFcnJvcigiSlNaaXAgbm90IGxvYWRlZCIpOyBjb25zdCB6aXA9YXdhaXQgSlNaaXAubG9hZEFzeW5jKGFiKTsgc3RhdGUuemlwPXppcDsgY29uc3QgZmlsZXM9W107IHppcC5mb3JFYWNoKChwYXRoLGVudHJ5KT0+eyBpZighZW50cnkuZGlyICYmIC9cLihjc3Z8ZGF0KSQvaS50ZXN0KHBhdGgpKSBmaWxlcy5wdXNoKHtuYW1lOnBhdGgsZW50cnl9KTsgfSk7IHN0YXRlLmZpbGVzPWZpbGVzOyBzdGF0ZS5nYWxheGllcz1maWxlcy5tYXAoZj0+Zi5uYW1lLnNwbGl0KCIvIikucG9wKCkpLmZpbHRlcihuPT4vX3JvdG1vZFwuKGNzdnxkYXQpJC9pLnRlc3QobikpLnNvcnQoKGEsYik9PmEubG9jYWxlQ29tcGFyZShiKSk7IHBvcHVsYXRlR2FsYXh5U2VsZWN0KCk7IHNldFRleHQoInppcFN0YXR1cyIsIGBTUEFSQyBsaXN0bzogJHtzdGF0ZS5nYWxheGllcy5sZW5ndGh9IGdhbGF4aWFzICgke2xhYmVsfSkuIGAgKyBgQ2FtQiBsYXc6IEM9KFZfSEkvz4NfSEkpXjI9KDUvOCleMj0ke0hJLkMudG9GaXhlZCg2KX0gOyBWX3JlYWwgPSBDIMK3IFZfa2VybmVsYCApOyBbImJ0blJ1bkdhbGF4eSIsImJ0bkdsb2JhbFJNUyIsImJ0blJ1bkR3YXJmcyJdLmZvckVhY2goaWQ9PmVuYWJsZShpZCx0cnVlKSk7IGlmKHN0YXRlLmdhbGF4aWVzLmxlbmd0aCl7IGVsLmdhbGF4eVNlbGVjdC52YWx1ZT1zdGF0ZS5nYWxheGllc1swXTsgYXdhaXQgcnVuU2VsZWN0ZWRHYWxheHkoKS5jYXRjaCgoKT0+e30pOyB9IH0gYXN5bmMgZnVuY3Rpb24gcmVhZEdhbGF4eShuYW1lKXsgY29uc3QgbG5hbWU9U3RyaW5nKG5hbWV8fCIiKS50b0xvd2VyQ2FzZSgpOyBjb25zdCBmPXN0YXRlLmZpbGVzLmZpbmQoeD0+e2NvbnN0IHA9eC5uYW1lLnRvTG93ZXJDYXNlKCk7IHJldHVybiBwLmVuZHNXaXRoKCIvIitsbmFtZSl8fHAuZW5kc1dpdGgobG5hbWUpO30pOyBpZighZikgdGhyb3cgbmV3IEVycm9yKCJHYWxheHkgbm90IGZvdW5kIGluIFpJUDogIituYW1lKTsgY29uc3QgdHh0PWF3YWl0IGYuZW50cnkuYXN5bmMoInN0cmluZyIpOyByZXR1cm4gcGFyc2VSb3Rtb2RUZXh0KHR4dCk7IH0gZnVuY3Rpb24gc2V0TGF3QmFubmVyKG5hbWUsIGZhY3Rvcil7IGNvbnN0IGJhbm5lciA9ICQoImxhd0Jhbm5lciIpOyBpZighYmFubmVyKSByZXR1cm47IGlmKGlzQ2FtQihuYW1lKSl7IGJhbm5lci50ZXh0Q29udGVudCA9IGBDYW1CIChkZXNjb2hlcmVudGUgLyBKb3VsZSBISSk6IEM9KFZfSEkvz4NfSEkpXjI9KDUvOCleMj0ke0hJLkMudG9GaXhlZCg2KX0g4oeSIFZfcmVhbCA9IEPCt1Zfa2VybmVsIChmYWN0b3I9JHtmYWN0b3IudG9GaXhlZCg2KX0pYDsgYmFubmVyLnN0eWxlLmRpc3BsYXkgPSAiYmxvY2siOyB9ZWxzZXsgYmFubmVyLnRleHRDb250ZW50ID0gYENvaGVyZW50ZTogVl9yZWFsID0gVl9rZXJuZWwgKHNpbiBKb3VsZS9ISSkuYDsgYmFubmVyLnN0eWxlLmRpc3BsYXkgPSAiYmxvY2siOyB9IH0gYXN5bmMgZnVuY3Rpb24gcnVuU2VsZWN0ZWRHYWxheHkoKXsgY29uc3QgbmFtZT1lbC5nYWxheHlTZWxlY3Q/LnZhbHVlOyBpZighbmFtZSkgdGhyb3cgbmV3IEVycm9yKCJObyBnYWxheHkgc2VsZWN0ZWQiKTsgc3RhdGUuY3VycmVudEdhbGF4eT1uYW1lOyBzZXRUZXh0KCJrcGlHYWxheHkiLG5hbWUpOyBzZXRUZXh0KCJoZXJvU2VsZWN0ZWQiLG5hbWUpOyBjb25zdCByb3dzPWF3YWl0IHJlYWRHYWxheHkobmFtZSk7IGNvbnN0IHt0YWJsZSxSTVMsZmFjdG9yfT1jb21wdXRlKG5hbWUscm93cyk7IHN0YXRlLmxhc3RDU1Y9dG9DU1YodGFibGUpOyBzZXRUZXh0KCJrcGlSTVMiLE51bWJlci5pc0Zpbml0ZShSTVMpP1JNUy50b0ZpeGVkKDIpOiLigJQiKTsgc2V0VGV4dCgiaGVyb1JtcyIsTnVtYmVyLmlzRmluaXRlKFJNUyk/KFJNUy50b0ZpeGVkKDIpKyIga20vcyIpOiLigJQiKTsgc2V0TGF3QmFubmVyKG5hbWUsIGZhY3Rvcik7IGNvbnN0IHg9dGFibGUubWFwKHI9PnIuUl9rcGMpOyBjb25zdCB5T2JzPXRhYmxlLm1hcChyPT5yLlZvYnMpOyBjb25zdCB5UHJlZD10YWJsZS5tYXAocj0+ci5WX3JlYWwpOyBjb25zdCBlPXRhYmxlLm1hcChyPT5OdW1iZXIuaXNGaW5pdGUoci5lVm9icyk/ci5lVm9iczowKTsgY29uc3QgaGFzRXJyPWUuc29tZSh2PT52PjApOyBjb25zdCBvYnM9e3gseTp5T2JzLG1vZGU6Im1hcmtlcnMiLG5hbWU6Ik9ic2VydmVkIixtYXJrZXI6e3NpemU6N319OyBpZihoYXNFcnIpIG9icy5lcnJvcl95PXt0eXBlOiJkYXRhIixhcnJheTplLHZpc2libGU6dHJ1ZSx0aGlja25lc3M6MSx3aWR0aDoyfTsgY29uc3QgcHJlZD17eCx5OnlQcmVkLG1vZGU6ImxpbmVzIiwgbmFtZTppc0NhbUIobmFtZSk/YFByZWRpY3RlZCAoVl9yZWFsID0gQ8K3Vl9rZXJuZWwsIEM9JHtmYWN0b3IudG9GaXhlZCgzKX0pYDoiUHJlZGljdGVkIChWX3JlYWwgPSBWX2tlcm5lbCkiLCBsaW5lOnt3aWR0aDozfX07IFBsb3RseS5uZXdQbG90KGVsLnBsb3RTcGFyYyxbb2JzLHByZWRdLCBwcm9MYXlvdXQoaXNDYW1CKG5hbWUpP2Ake25hbWV9IOKAlCBKb3VsZS9ISSBhcHBsaWVkYCA6IG5hbWUsInIgKGtwYykiLCJWIChrbS9zKSIpLCBwcm9Db25maWcoKSApOyBzdGF0ZS5sYXN0UE5HVGFyZ2V0PSJwbG90U3BhcmMiOyBlbmFibGUoImJ0bkNTViIsdHJ1ZSk7IGVuYWJsZSgiYnRuUE5HIix0cnVlKTsgaWYoaXNDYW1CKG5hbWUpICYmIHRhYmxlLmxlbmd0aCl7IGNvbnNvbGUubG9nKCJbQ2FtQiBkZWJ1ZyB2MTFdIiwgeyBWX2tlcm5lbDA6IHRhYmxlWzBdLlZfa2VybmVsLCBDOiBISS5DLCBzcXJ0QzogSEkuc3FydEMsIFZfcmVhbDA6IHRhYmxlWzBdLlZfcmVhbCB9KTsgfSB9IGFzeW5jIGZ1bmN0aW9uIHJ1bkdsb2JhbFJNUygpeyBzZXRUZXh0KCJnbG9iYWxPdXQiLCJDb21wdXRpbmcgZ2xvYmFsIFJNUy4uLiIpOyBjb25zdCBwdHM9W107IGZvcihjb25zdCBnIG9mIHN0YXRlLmdhbGF4aWVzKXsgY29uc3Qgcm93cz1hd2FpdCByZWFkR2FsYXh5KGcpOyBjb25zdCB7Uk1TfT1jb21wdXRlKGcscm93cyk7IHB0cy5wdXNoKHtuYW1lOmcsUk1TfSk7IH0gcHRzLnNvcnQoKGEsYik9PihiLlJNU3x8MCktKGEuUk1TfHwwKSk7IHN0YXRlLmxhc3RHbG9iYWxDU1Y9WyJuYW1lLFJNU19rbV9zIl0uY29uY2F0KHB0cy5tYXAocD0+YCR7cC5uYW1lfSwke3AuUk1TfWApKS5qb2luKCJcbiIpOyBlbmFibGUoImJ0bkdsb2JhbENTViIsdHJ1ZSk7IFBsb3RseS5uZXdQbG90KGVsLnBsb3RHbG9iYWwsW3t4OnB0cy5tYXAocD0+cC5STVMpLHk6cHRzLm1hcChwPT5wLm5hbWUpLHR5cGU6ImJhciIsb3JpZW50YXRpb246ImgifV0sIHByb0xheW91dCgiR2xvYmFsIFJNUyAoYWxsIGdhbGF4aWVzKSIsIlJNUyAoa20vcykiLCIiLDE2MCksIHByb0NvbmZpZygpKTsgc3RhdGUubGFzdFBOR1RhcmdldD0icGxvdEdsb2JhbCI7IHNldFRleHQoImdsb2JhbE91dCIscHRzLmxlbmd0aD9gRG9uZS4gV29yc3QgUk1TOiAke3B0c1swXS5uYW1lfSA9ICR7cHRzWzBdLlJNUy50b0ZpeGVkKDIpfSBrbS9zYDoiRG9uZS4iKTsgfSBmdW5jdGlvbiBpc0R3YXJmTmFtZShuYW1lKXsgY29uc3Qgcz1TdHJpbmcobmFtZXx8IiIpLnRvTG93ZXJDYXNlKCk7IHJldHVybiBzLmluY2x1ZGVzKCJjYW1iIil8fHMuaW5jbHVkZXMoImRyYWNvIil8fHMuaW5jbHVkZXMoInVyc2EiKXx8cy5pbmNsdWRlcygic2V4dGFucyIpfHxzLmluY2x1ZGVzKCJjYXJpbmEiKXx8cy5pbmNsdWRlcygiZm9ybmF4Iil8fHMuaW5jbHVkZXMoInNjdWxwdG9yIil8fHMuaW5jbHVkZXMoImxlbyIpOyB9IGFzeW5jIGZ1bmN0aW9uIHJ1bkR3YXJmcygpeyBzZXRUZXh0KCJkd2FyZnNPdXQiLCJSdW5uaW5nIGR3YXJmIHNldC4uLiIpOyBjb25zdCBkd2FyZnM9c3RhdGUuZ2FsYXhpZXMuZmlsdGVyKGlzRHdhcmZOYW1lKTsgY29uc3QgcHRzPVtdOyBmb3IoY29uc3QgZyBvZiBkd2FyZnMpeyBjb25zdCByb3dzPWF3YWl0IHJlYWRHYWxheHkoZyk7IGNvbnN0IHtSTVN9PWNvbXB1dGUoZyxyb3dzKTsgcHRzLnB1c2goe25hbWU6ZyxSTVN9KTsgfSBwdHMuc29ydCgoYSxiKT0+KGIuUk1TfHwwKS0oYS5STVN8fDApKTsgc3RhdGUubGFzdER3YXJmc0NTVj1bIm5hbWUsUk1TX2ttX3MiXS5jb25jYXQocHRzLm1hcChwPT5gJHtwLm5hbWV9LCR7cC5STVN9YCkpLmpvaW4oIlxuIik7IGVuYWJsZSgiYnRuRHdhcmZzQ1NWIix0cnVlKTsgZW5hYmxlKCJidG5Ed2FyZnNQTkciLHRydWUpOyBQbG90bHkubmV3UGxvdChlbC5wbG90RHdhcmZzLFt7eDpwdHMubWFwKHA9PnAuUk1TKSx5OnB0cy5tYXAocD0+cC5uYW1lKSx0eXBlOiJiYXIiLG9yaWVudGF0aW9uOiJoIn1dLCBwcm9MYXlvdXQoIkR3YXJmcyBSTVMiLCJSTVMgKGttL3MpIiwiIiwxNjApLCBwcm9Db25maWcoKSk7IHN0YXRlLmxhc3RQTkdUYXJnZXQ9InBsb3REd2FyZnMiOyBzZXRUZXh0KCJkd2FyZnNPdXQiLGBEb25lLiBOPSR7cHRzLmxlbmd0aH1gKTsgfSBmdW5jdGlvbiBsb2FkU2NyaXB0KHNyYyl7IHJldHVybiBuZXcgUHJvbWlzZSgocmVzb2x2ZSxyZWplY3QpPT57IGNvbnN0IHM9ZG9jdW1lbnQuY3JlYXRlRWxlbWVudCgic2NyaXB0Iik7IHMuc3JjPXNyYzsgcy5hc3luYz10cnVlOyBzLm9ubG9hZD0oKT0+cmVzb2x2ZShzcmMpOyBzLm9uZXJyb3I9KCk9PnJlamVjdChuZXcgRXJyb3IoIkZhaWxlZCB0byBsb2FkICIrc3JjKSk7IGRvY3VtZW50LmhlYWQuYXBwZW5kQ2hpbGQocyk7IH0pOyB9IGFzeW5jIGZ1bmN0aW9uIGVuc3VyZUxpYnMoKXsgY29uc3QgdGFza3M9W107IGlmKCF3aW5kb3cuSlNaaXApIHRhc2tzLnB1c2gobG9hZFNjcmlwdCgiaHR0cHM6Ly9jZG4uanNkZWxpdnIubmV0L25wbS9qc3ppcEAzLjEwLjEvZGlzdC9qc3ppcC5taW4uanMiKSk7IGlmKCF3aW5kb3cuUGxvdGx5KSB0YXNrcy5wdXNoKGxvYWRTY3JpcHQoImh0dHBzOi8vY2RuLnBsb3QubHkvcGxvdGx5LTIuMzUuMi5taW4uanMiKSk7IGlmKHRhc2tzLmxlbmd0aCl7IHNldFRleHQoInppcFN0YXR1cyIsIkxvYWRpbmcgbGlicmFyaWVzIChQbG90bHkvSlNaaXApLi4uIik7IGF3YWl0IFByb21pc2UuYWxsKHRhc2tzKTsgfSB9IGFzeW5jIGZ1bmN0aW9uIHRyeUF1dG9sb2FkWmlwKCl7IGNvbnN0IGNhbmRpZGF0ZXM9WyIuL1JvdG1vZF9MVEcuemlwIiwiUm90bW9kX0xURy56aXAiLCIuL3JvdG1vZF9sdGcuemlwIiwicm90bW9kX2x0Zy56aXAiXTsgZm9yKGNvbnN0IHVybCBvZiBjYW5kaWRhdGVzKXsgdHJ5eyBjb25zdCByZXM9YXdhaXQgZmV0Y2godXJsLHtjYWNoZToibm8tc3RvcmUifSk7IGlmKCFyZXMub2spIHRocm93IG5ldyBFcnJvcigiSFRUUCAiK3Jlcy5zdGF0dXMpOyBjb25zdCBhYj1hd2FpdCByZXMuYXJyYXlCdWZmZXIoKTsgYXdhaXQgbG9hZFppcEZyb21BcnJheUJ1ZmZlcihhYix1cmwpOyByZXR1cm4gdHJ1ZTsgfWNhdGNoKGUpeyBjb25zb2xlLndhcm4oIltaSVBdIGZhaWwiLHVybCxlLm1lc3NhZ2V8fGUpOyB9IH0gc2V0VGV4dCgiemlwU3RhdHVzIiwiQXV0by1sb2FkIEZBSUxFRC4gU3Viw60gUm90bW9kX0xURy56aXAgYWwgcmVwbyBvIGNhcmdhbG8gbWFudWFsbWVudGUgY29uICdMb2FkIFpJUCcuIik7IGVuYWJsZSgiYnRuTG9hZFppcCIsdHJ1ZSk7IHJldHVybiBmYWxzZTsgfSBmdW5jdGlvbiB3aXJlKCl7IFsiYnRuUnVuR2FsYXh5IiwiYnRuR2xvYmFsUk1TIiwiYnRuQ1NWIiwiYnRuUE5HIiwiYnRuR2xvYmFsQ1NWIiwiYnRuUnVuRHdhcmZzIiwiYnRuRHdhcmZzQ1NWIiwiYnRuRHdhcmZzUE5HIl0uZm9yRWFjaChpZD0+ZW5hYmxlKGlkLGZhbHNlKSk7IGVsLmJ0blJ1bkdhbGF4eT8uYWRkRXZlbnRMaXN0ZW5lcigiY2xpY2siLCAoKT0+cnVuU2VsZWN0ZWRHYWxheHkoKS5jYXRjaChlPT5hbGVydChlLm1lc3NhZ2V8fGUpKSk7IGVsLmJ0bkdsb2JhbFJNUz8uYWRkRXZlbnRMaXN0ZW5lcigiY2xpY2siLCAoKT0+cnVuR2xvYmFsUk1TKCkuY2F0Y2goZT0+YWxlcnQoZS5tZXNzYWdlfHxlKSkpOyBlbC5idG5DU1Y/LmFkZEV2ZW50TGlzdGVuZXIoImNsaWNrIiwgKCk9PnsgaWYoc3RhdGUubGFzdENTVikgZG93bmxvYWRUZXh0KGAke3N0YXRlLmN1cnJlbnRHYWxheHl8fCJnYWxheHkifV9wcmVkLmNzdmAsIHN0YXRlLmxhc3RDU1YpOyB9KTsgZWwuYnRuUE5HPy5hZGRFdmVudExpc3RlbmVyKCJjbGljayIsICgpPT57IGlmKHN0YXRlLmxhc3RQTkdUYXJnZXQpIGRvd25sb2FkUE5HKHN0YXRlLmxhc3RQTkdUYXJnZXQpLmNhdGNoKGU9PmFsZXJ0KGUubWVzc2FnZXx8ZSkpOyB9KTsgZWwuYnRuR2xvYmFsQ1NWPy5hZGRFdmVudExpc3RlbmVyKCJjbGljayIsICgpPT57IGlmKHN0YXRlLmxhc3RHbG9iYWxDU1YpIGRvd25sb2FkVGV4dCgiZ2xvYmFsX3Jtcy5jc3YiLCBzdGF0ZS5sYXN0R2xvYmFsQ1NWKTsgfSk7IGVsLmJ0blJ1bkR3YXJmcz8uYWRkRXZlbnRMaXN0ZW5lcigiY2xpY2siLCAoKT0+cnVuRHdhcmZzKCkuY2F0Y2goZT0+YWxlcnQoZS5tZXNzYWdlfHxlKSkpOyBlbC5idG5Ed2FyZnNDU1Y/LmFkZEV2ZW50TGlzdGVuZXIoImNsaWNrIiwgKCk9PnsgaWYoc3RhdGUubGFzdER3YXJmc0NTVikgZG93bmxvYWRUZXh0KCJkd2FyZnNfcm1zLmNzdiIsIHN0YXRlLmxhc3REd2FyZnNDU1YpOyB9KTsgZWwuYnRuRHdhcmZzUE5HPy5hZGRFdmVudExpc3RlbmVyKCJjbGljayIsICgpPT5kb3dubG9hZFBORygicGxvdER3YXJmcyIpLmNhdGNoKGU9PmFsZXJ0KGUubWVzc2FnZXx8ZSkpKTsgZWwuYnRuTG9hZFppcD8uYWRkRXZlbnRMaXN0ZW5lcigiY2xpY2siLCAoKT0+ZWwuc3BhcmNGaWxlPy5jbGljaygpKTsgZWwuc3BhcmNGaWxlPy5hZGRFdmVudExpc3RlbmVyKCJjaGFuZ2UiLCBhc3luYyAoZXYpPT57IGNvbnN0IGY9ZXYudGFyZ2V0LmZpbGVzICYmIGV2LnRhcmdldC5maWxlc1swXTsgaWYoIWYpIHJldHVybjsgdHJ5eyBzZXRUZXh0KCJ6aXBTdGF0dXMiLCJDYXJnYW5kbyBaSVAgbG9jYWwuLi4iKTsgYXdhaXQgbG9hZFppcEZyb21BcnJheUJ1ZmZlcihhd2FpdCBmLmFycmF5QnVmZmVyKCksImxvY2FsIik7IH0gY2F0Y2goZSl7IGNvbnNvbGUuZXJyb3IoZSk7IHNldFRleHQoInppcFN0YXR1cyIsIlpJUCBsb2NhbCBGQUlMRUQ6ICIrKGUubWVzc2FnZXx8ZSkpOyBhbGVydCgiWklQIGVycm9yOiAiKyhlLm1lc3NhZ2V8fGUpKTsgfSBmaW5hbGx5eyB0cnl7IGVsLnNwYXJjRmlsZS52YWx1ZT0iIjsgfWNhdGNoKF8peyB9IH0gfSk7IGVsLmJ0blJlc2V0Py5hZGRFdmVudExpc3RlbmVyKCJjbGljayIsICgpPT5sb2NhdGlvbi5yZWxvYWQoKSk7IGVsLmJ0blJ1bkxvY3Vzcz8uYWRkRXZlbnRMaXN0ZW5lcigiY2xpY2siLCAoKT0+eyBpZihlbC5sb2N1c3NPdXQpIGVsLmxvY3Vzc091dC50ZXh0Q29udGVudD0iTG9DdVNTIG1vZHVsZTogcGVuZGluZyBpbnRlZ3JhdGlvbiAoa2VwdCBzdGFibGUpLiI7IH0pOyB9IGRvY3VtZW50LmFkZEV2ZW50TGlzdGVuZXIoIkRPTUNvbnRlbnRMb2FkZWQiLCBhc3luYyAoKT0+eyB0cnl7IHdpcmUoKTsgYXdhaXQgZW5zdXJlTGlicygpOyBhd2FpdCB0cnlBdXRvbG9hZFppcCgpOyB9IGNhdGNoKGUpeyBjb25zb2xlLmVycm9yKGUpOyBzZXRUZXh0KCJ6aXBTdGF0dXMiLCJGYXRhbDogIisoZS5tZXNzYWdlfHxlKSk7IH0gfSk7";(new Function(atob(d)))();})();
+</script>
+</body>
+</html>
