@@ -1,4 +1,4 @@
-const BASE = https://"thot-engine.onrender.com/health; "// <-- tu Render
+const BASE = https://"https://thot-engine.onrender.com"// <-- tu Render
 const URL_COMPUTE = `${BASE}/compute`;
 const URL_GLOBAL  = `${BASE}/global_rms`;
 const URL_DWARFS  = `${BASE}/dwarfs`;
@@ -146,3 +146,4 @@ function drawBar(divId, title, items){
   ], { title, xaxis:{title:"RMS (km/s)"}, margin:{l:220} });
 
 }
+
