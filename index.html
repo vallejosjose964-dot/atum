@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>ATUM — THOT Engine (Micro + Macro)</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#050712;
+      --panel: rgba(11,16,34,.78);
+      --panel2: rgba(11,16,34,.58);
+      --text:#e9f1ff;
+      --muted:#9fb0d0;
+      --line: rgba(255,255,255,.10);
+      --accent:#6ee7ff;
+      --accent2:#a78bfa;
+      --ok:#34d399;
+      --bad:#ff6b6b;
+      --shadow: 0 16px 48px rgba(0,0,0,.55);
+      --r:18px;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      color: var(--text);
+      background:
+        radial-gradient(1200px 700px at 15% 0%, rgba(110,231,255,.18), transparent 60%),
+        radial-gradient(1000px 700px at 85% 10%, rgba(167,139,250,.16), transparent 55%),
+        radial-gradient(900px 700px at 45% 80%, rgba(110,231,255,.08), transparent 60%),
+        var(--bg);
+    }
+    a{ color: var(--accent); text-decoration:none; }
+
+    header{
+      position: sticky; top:0; z-index:10;
+      backdrop-filter: blur(10px);
+      background: rgba(5,7,18,.78);
+      border-bottom: 1px solid var(--line);
+    }
+    .wrap{ max-width: 1280px; margin:0 auto; padding: 14px 16px; }
+
+    .topbar{
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+    }
+    .brand{ display:flex; align-items:center; gap:14px; min-width: 0; }
+    .logo{
+      width:44px; height:44px; border-radius:16px;
+      background: linear-gradient(135deg, rgba(110,231,255,.95), rgba(167,139,250,.95));
+      box-shadow: var(--shadow);
+      flex: 0 0 auto;
+    }
+    .brandText{ min-width:0; }
+    .heroTitle{
+      font-family: Orbitron, Inter, system-ui;
+      font-size: 16px;
+      letter-spacing: 1px;
+      margin:0;
+      white-space: nowrap;
+      overflow:hidden;
+      text-overflow: ellipsis;
+    }
+    .heroSub{ margin-top:3px; color: var(--muted); font-size:12px; }
+
+    .statusPill{
+      display:flex; align-items:center; gap:10px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      padding:8px 12px;
+      border-radius: 999px;
+      font-size:12px;
+      flex: 0 0 auto;
+    }
+    .dot{ width:10px; height:10px; border-radius:50%; background: rgba(255,255,255,.25); }
+    .dot.ok{ background: var(--ok); }
+    .dot.bad{ background: var(--bad); }
+
+    main{ padding: 16px 0 34px; }
+
+    .grid{ display:grid; grid-template-columns: 480px 1fr; gap:14px; }
+    @media (max-width: 1020px){ .grid{ grid-template-columns: 1fr; } }
+
+    .card{
+      border:1px solid var(--line);
+      background: var(--panel);
+      border-radius: var(--r);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .hd{
+      padding:12px 14px;
+      border-bottom:1px solid var(--line);
+      background: rgba(255,255,255,.02);
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+    }
+    .hd h2{
+      margin:0;
+      font-family: Orbitron, Inter, system-ui;
+      font-size:12px;
+      letter-spacing:.9px;
+      color: rgba(233,241,255,.92);
+    }
+    .bd{ padding: 14px; }
+    .muted{ color: var(--muted); font-size: 12px; }
+    .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    .sep{ height:1px; background: var(--line); margin: 12px 0; }
+
+    .row{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+    .row.nowrap{ flex-wrap:nowrap; }
+    .row.tight{ gap:8px; }
+    .row > *{ min-width: 0; }
+
+    button, select, input[type="text"]{
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.05);
+      color: var(--text);
+      border-radius: 14px;
+      padding: 9px 11px;
+      font-size: 13px;
+      outline:none;
+    }
+    input[type="text"]{ width:100%; }
+    button{ cursor:pointer; user-select:none; }
+    button:hover{ background: rgba(255,255,255,.10); border-color: rgba(255,255,255,.18); }
+    button:active{ transform: translateY(1px); }
+    button.primary{
+      border-color: rgba(110,231,255,.45);
+      background: rgba(110,231,255,.12);
+    }
+    button.primary:hover{ background: rgba(110,231,255,.18); }
+    button:disabled{ opacity:.45; cursor:not-allowed; }
+    select{ width:100%; }
+
+    .heroPanel{
+      border:1px solid var(--line);
+      border-radius: var(--r);
+      background: rgba(0,0,0,.16);
+      padding: 14px;
+    }
+    .atum{
+      font-family: Orbitron, Inter, system-ui;
+      font-size: 58px;
+      font-weight: 700;
+      letter-spacing: 10px;
+      margin: 4px 0 0;
+      background: linear-gradient(90deg, #6ee7ff, #a78bfa, #ffffff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow:
+        0 0 22px rgba(110,231,255,.55),
+        0 0 46px rgba(167,139,250,.35);
+      text-align:center;
+    }
+    .glowLine{
+      width: 240px; height: 3px; margin: 14px auto 10px;
+      background: linear-gradient(90deg, #6ee7ff, #a78bfa);
+      box-shadow: 0 0 22px rgba(110,231,255,.55);
+      border-radius: 999px;
+    }
+    .tagline{ text-align:center; margin:0; color: rgba(233,241,255,.90); }
+    .tagline small{ color: var(--muted); display:block; margin-top:6px; }
+
+    .tabs{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top: 12px;
+    }
+    .chip{
+      padding: 9px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      white-space: nowrap;
+    }
+    .chip.active{
+      border-color: rgba(110,231,255,.45);
+      background: rgba(110,231,255,.12);
+    }
+
+    .hint{
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.35;
+      background: rgba(255,255,255,.03);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 10px;
+    }
+    .hint b{ color: rgba(233,241,255,.88); font-weight:600; }
+
+    .log{
+      height: 210px;
+      overflow:auto;
+      white-space: pre-wrap;
+      font-size: 12px;
+      border:1px solid var(--line);
+      border-radius: 16px;
+      padding: 10px;
+      background: rgba(0,0,0,.22);
+    }
+
+    .canvasWrap{
+      border:1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(0,0,0,.22);
+      padding: 10px;
+    }
+    canvas{ width:100%; height:460px; display:block; }
+    @media (max-width: 980px){ canvas{ height: 360px; } }
+
+    .kv{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .kv .box{
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.03);
+      border-radius: 16px;
+      padding: 10px;
+      min-height: 58px;
+    }
+    .kv .k{ font-size: 11px; color: var(--muted); }
+    .kv .v{ margin-top: 5px; font-size: 12px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+
+    table{
+      width:100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      border:1px solid var(--line);
+      border-radius: 16px;
+      overflow:hidden;
+      background: rgba(255,255,255,.02);
+    }
+    th, td{
+      padding:8px 8px;
+      border-bottom:1px solid var(--line);
+      text-align:left;
+    }
+    th{ color:var(--muted); font-weight:600; background: rgba(255,255,255,.03); }
+    tr:last-child td{ border-bottom:none; }
+
+    .footer{
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+      border-top: 1px solid var(--line);
+      padding-top: 12px;
+    }
+  </style>
+</head>
+
+<body>
+<header>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div class="brandText">
+          <h1 class="heroTitle">ATUM — Micro + Macro</h1>
+          <div class="heroSub">Unified engine · Powered by THOT</div>
+        </div>
+      </div>
+
+      <div class="statusPill">
+        <span class="dot" id="backendDot"></span>
+        <span id="backendLabel" class="mono">Backend: no verificado</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <div class="grid">
+
+      <!-- LEFT -->
+      <section class="card">
+        <div class="hd">
+          <h2>CONTROL</h2>
+          <div class="row tight">
+            <button id="btnReset">Reset</button>
+          </div>
+        </div>
+
+        <div class="bd">
+          <div class="heroPanel">
+            <div class="atum">ATUM</div>
+            <div class="glowLine"></div>
+            <p class="tagline">
+              Motor físico unificado Micro–Macro
+              <small>Una sola constante. Sin perillas. Sin ajustes manuales.</small>
+            </p>
+
+            <!-- TABS: todo horizontal -->
+            <div class="tabs" aria-label="Modos">
+              <button class="chip" id="btnW" title="Micro: W bosón">W Bosón</button>
+              <button class="chip" id="btnZ" title="Micro: Z pole">Z Pole</button>
+              <button class="chip" id="btnMuon" title="Micro: muón">Muón</button>
+
+              <span style="flex:1 1 auto;"></span>
+
+              <button class="chip active" id="btnGalaxies" title="Macro: 175 galaxias">Macro Galaxias</button>
+              <button class="chip" id="btnClusters" title="Macro: 40 cúmulos">Clusters</button>
+              <button class="chip" id="btnDwarfs" title="Macro: enanas">Enanas</button>
+            </div>
+
+            <div class="hint">
+              <div><b>Flujo:</b> 1) Ping  2) Load dataset  3) Preview  4) Compute o Global RMS.</div>
+              <div><b>Micro:</b> usa <span class="mono">/micro</span>. <b>Macro:</b> usa <span class="mono">/compute</span> y <span class="mono">/global_rms</span>.</div>
+            </div>
+          </div>
+
+          <div class="sep"></div>
+
+          <div class="muted">BACKEND (THOT)</div>
+          <div class="row" style="margin-top:8px;">
+            <input type="text" id="backendBase" value="https://thot-engine.onrender.com" />
+          </div>
+
+          <!-- botones horizontales y claros -->
+          <div class="row nowrap tight" style="margin-top:10px;">
+            <button id="btnPing" class="primary">Ping</button>
+            <button id="btnLoadRepo" class="primary">Load</button>
+            <button id="btnPreview">Preview</button>
+            <button id="btnCompute" class="primary">Compute</button>
+            <button id="btnGlobalRMS">Global RMS</button>
+          </div>
+          <div class="muted" style="margin-top:6px;">
+            Si algún botón queda abajo en pantallas chicas, es normal: sigue alineado y legible.
+          </div>
+
+          <div class="sep"></div>
+
+          <div class="muted">DATASET (ZIP)</div>
+          <div class="row" style="margin-top:8px;">
+            <input type="text" id="repoZipUrl" value="./Rotmod_LTG.zip"/>
+          </div>
+
+          <div class="row" style="margin-top:10px;">
+            <select id="fileSelect" disabled>
+              <option value="">(sin dataset cargado)</option>
+            </select>
+          </div>
+
+          <div class="sep"></div>
+
+          <div class="muted">MICRO (SALIDA)</div>
+          <div class="kv">
+            <div class="box">
+              <div class="k">a_star_m_s2</div>
+              <div class="v" id="microAStar">—</div>
+            </div>
+            <div class="box">
+              <div class="k">status</div>
+              <div class="v" id="microStatus">—</div>
+            </div>
+          </div>
+
+          <div class="sep"></div>
+
+          <div class="muted">LOG</div>
+          <div id="log" class="log mono"></div>
+
+          <div class="footer">
+            © ATUM — Software propietario de Fabián Vallejos. Registrado en INPI (Argentina). Todos los derechos reservados.
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT -->
+      <section class="card">
+        <div class="hd">
+          <h2>CURVA + RESULTADOS</h2>
+          <div class="row tight">
+            <button id="btnPNG">PNG</button>
+            <button id="btnCSV" disabled>Download file</button>
+          </div>
+        </div>
+
+        <div class="bd">
+          <div class="canvasWrap">
+            <canvas id="curve" width="1400" height="820"></canvas>
+          </div>
+
+          <div class="sep"></div>
+
+          <div class="muted">TABLA</div>
+          <table>
+            <thead><tr><th>Objeto</th><th>RMS (km/s)</th><th>Detalle</th></tr></thead>
+            <tbody id="resultsBody">
+              <tr><td class="mono">—</td><td>—</td><td class="muted">Esperando…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script src="./app.js"></script>
+</body>
+</html>
