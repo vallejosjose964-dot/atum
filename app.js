@@ -438,10 +438,38 @@ async function computeSelected(){
     const resp = await postJSON('/compute', {galaxy_name, rows: parsed.rows});
     setMicro(resp);
 
-    const model = extractModelCurve(resp);
-    renderCurve(parsed.obs, model, galaxy_name);
-    document.getElementById("bigRMS").textContent =
-  "RMS = " + rms + " km/s";
+const model = extractModelCurve(resp);
+renderCurve(parsed.obs, model, galaxy_name);
+
+// ✅ RMS + Centro/Medio/Borde (PEGAR ESTO)
+const rmsVal = resp?.macro?.rms_kms ?? resp?.macro?.rms ?? null;
+const rmsStr = (rmsVal === null || rmsVal === undefined) ? '—' : String(rmsVal);
+
+// RMS grande (solo si existe el div)
+const big = document.getElementById("bigRMS");
+if (big) big.textContent = `RMS: ${rmsStr} km/s`;
+
+// Centro / Medio / Borde desde OBS
+const obs = parsed?.obs || [];
+let rowsOut = [{obj: galaxy_name, rms: `${rmsStr} km/s`, detail:'RMS total'}];
+
+if (obs.length >= 3) {
+  const center = Number(obs[0].y);
+  const mid = Number(obs[Math.floor(obs.length/2)].y);
+  const edge = Number(obs[obs.length-1].y);
+
+  const f = (x)=> (Number.isFinite(x) ? x.toFixed(2) : '—');
+
+  rowsOut = [
+    {obj: `${galaxy_name} — Centro`, rms: `${f(center)} km/s`, detail:'r mínimo'},
+    {obj: `${galaxy_name} — Medio`, rms: `${f(mid)} km/s`, detail:'r medio'},
+    {obj: `${galaxy_name} — Borde`, rms: `${f(edge)} km/s`, detail:'r máximo'},
+    {obj: `${galaxy_name} — RMS`, rms: `${rmsStr} km/s`, detail:'RMS total'}
+  ];
+}
+
+setResults(rowsOut);
+log(`OK compute ${galaxy_name} rms=${rmsStr}`);
 
 // --------- resumen físico claro ----------
 const obs = parsed.obs;
