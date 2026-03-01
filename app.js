@@ -54,8 +54,14 @@ const DATASET_URLS = {
   galaxies: './Rotmod_LTG.zip',
   clusters: './LoCuSS.zip',
   dwarfs: './Rotmod_LTG.zip' // si tenés un dwarfs.zip, cambialo acá
-};
 
+const macroVCenter = document.getElementById('macroVCenter');
+const macroVEdge   = document.getElementById('macroVEdge');
+const macroVMax    = document.getElementById('macroVMax');
+const macroRCenter = document.getElementById('macroRCenter');
+const macroREdge   = document.getElementById('macroREdge');
+const macroSlope   = document.getElementById('macroSlope');
+};
 // ---------- helpers ----------
 function now(){
   const d = new Date();
@@ -377,8 +383,29 @@ function setResults(rows){
     tr.innerHTML = `<td class="mono">${escapeHtml(r.obj)}</td><td>${escapeHtml(r.rms)}</td><td class="muted">${escapeHtml(r.detail||'')}</td>`;
     resultsBody.appendChild(tr);
   }
-}
 
+function setMacroStructure(resp){
+  const s = resp?.macro?.structure;
+  if(!s){
+    macroVCenter.textContent = '—';
+    macroVEdge.textContent   = '—';
+    macroVMax.textContent    = '—';
+    macroRCenter.textContent = '—';
+    macroREdge.textContent   = '—';
+    macroSlope.textContent   = '—';
+    return;
+  }
+
+  const fmt = (x, n=2) => (Number.isFinite(Number(x)) ? Number(x).toFixed(n) : '—');
+
+  macroVCenter.textContent = fmt(s.V_center, 2);
+  macroVEdge.textContent   = fmt(s.V_edge, 2);
+  macroVMax.textContent    = fmt(s.V_max, 2);
+  macroRCenter.textContent = fmt(s.R_center, 3);
+  macroREdge.textContent   = fmt(s.R_edge, 3);
+  macroSlope.textContent   = fmt(s.slope_center, 3);
+}
+  }
 // ---------- actions ----------
 function setMode(mode){
   activeMode = mode;
@@ -412,6 +439,7 @@ async function loadDataset(){
   }finally{
     setBusy(false);
   }
+  
 }
 
 async function preview(){
@@ -443,6 +471,7 @@ async function computeSelected(){
 
     const rms = resp?.macro?.rms_kms ?? '—';
     setResults([{obj: galaxy_name, rms, detail:'compute'}]);
+    setMacroStructure(resp);
     log(`OK compute ${galaxy_name} rms=${rms}`);
   }catch(e){
     log(`ERROR compute: ${e}`);
@@ -590,4 +619,5 @@ btnMuon.addEventListener('click', ()=>microOnly('MUON'));
   await loadDataset();
   try{ await preview(); }catch(e){}
   try{ await computeSelected(); }catch(e){}
+
 })();
