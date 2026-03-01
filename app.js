@@ -184,9 +184,9 @@ function renderCurve(obs, model, label){
   clearCanvas();
   const b=boundsFor(obs, model);
   drawAxes(b, 'r (kpc)', 'V (km/s)');
-  plotSeries(obs, b, `OBS: ${label}`, 'rgba(110,231,255,0.95)');
+  plotSeries(obs, b, ,'Observado'rgba(110,231,255,0.95)');
   if(model && model.length){
-    plotSeries(model, b, `MODEL`, 'rgba(167,139,250,0.88)');
+    plotSeries(model, b, `MODEL THOT' 'rgba(167,139,250,0.88)');
   }
 }
 
@@ -440,6 +440,9 @@ async function computeSelected(){
 
     const model = extractModelCurve(resp);
     renderCurve(parsed.obs, model, galaxy_name);
+    document.getElementById("bigRMS").textContent =
+  "RMS = " + rms + " km/s";
+
 // --------- resumen físico claro ----------
 const obs = parsed.obs;
 if (obs.length > 2) {
