@@ -404,6 +404,34 @@
             </tbody>
           </table>
         </div>
+        <!-- MACRO: estructura (centro/borde) -->
+<div style="margin:12px 0; display:grid; grid-template-columns:repeat(3,1fr); gap:10px;">
+  <div style="border:1px solid rgba(255,255,255,.12); border-radius:14px; padding:10px;">
+    <div style="opacity:.7; font-size:12px;">V_center (km/s)</div>
+    <div id="macroVCenter" style="font-family:monospace; font-size:13px;">—</div>
+  </div>
+  <div style="border:1px solid rgba(255,255,255,.12); border-radius:14px; padding:10px;">
+    <div style="opacity:.7; font-size:12px;">V_edge (km/s)</div>
+    <div id="macroVEdge" style="font-family:monospace; font-size:13px;">—</div>
+  </div>
+  <div style="border:1px solid rgba(255,255,255,.12); border-radius:14px; padding:10px;">
+    <div style="opacity:.7; font-size:12px;">V_max (km/s)</div>
+    <div id="macroVMax" style="font-family:monospace; font-size:13px;">—</div>
+  </div>
+
+  <div style="border:1px solid rgba(255,255,255,.12); border-radius:14px; padding:10px;">
+    <div style="opacity:.7; font-size:12px;">R_center (kpc)</div>
+    <div id="macroRCenter" style="font-family:monospace; font-size:13px;">—</div>
+  </div>
+  <div style="border:1px solid rgba(255,255,255,.12); border-radius:14px; padding:10px;">
+    <div style="opacity:.7; font-size:12px;">R_edge (kpc)</div>
+    <div id="macroREdge" style="font-family:monospace; font-size:13px;">—</div>
+  </div>
+  <div style="border:1px solid rgba(255,255,255,.12); border-radius:14px; padding:10px;">
+    <div style="opacity:.7; font-size:12px;">slope_center (km/s/kpc)</div>
+    <div id="macroSlope" style="font-family:monospace; font-size:13px;">—</div>
+  </div>
+</div>
       </section>
 
     </div>
@@ -413,4 +441,5 @@
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <script src="./app.js"></script>
 </body>
+
 </html>
