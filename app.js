@@ -191,9 +191,13 @@ function renderCurve(obs, model, label){
   clearCanvas();
   const b=boundsFor(obs, model);
   drawAxes(b, 'r (kpc)', 'V (km/s)');
-  plotSeries(obs, b, ,'Observado'rgba(110,231,255,0.95)');
+ function renderCurve(obs, model, label){
+  clearCanvas();
+  const b = boundsFor(obs, model);
+  drawAxes(b, 'r (kpc)', 'V (km/s)');
+  plotSeries(obs, b, 'OBS', 'rgba(110,231,255,0.95)');
   if(model && model.length){
-    plotSeries(model, b, `MODEL THOT' 'rgba(167,139,250,0.88)');
+    plotSeries(model, b, 'MODEL', 'rgba(167,139,250,0.88)');
   }
 }
 
@@ -478,60 +482,6 @@ if (obs.length >= 3) {
 setResults(rowsOut);
 log(`OK compute ${galaxy_name} rms=${rmsStr}`);
 
-// --------- resumen físico claro ----------
-const obs = parsed.obs;
-if (obs.length > 2) {
-  const center = obs[0].y.toFixed(2);
-  const mid = obs[Math.floor(obs.length/2)].y.toFixed(2);
-  const edge = obs[obs.length-1].y.toFixed(2);
-
-  setResults([
-    {obj: galaxy_name + " (Centro)", rms: center + " km/s", detail:"r mínimo"},
-    {obj: galaxy_name + " (Medio)", rms: mid + " km/s", detail:"r medio"},
-    {obj: galaxy_name + " (Borde)", rms: edge + " km/s", detail:"r máximo"},
-    {obj: galaxy_name, rms: rms + " km/s", detail:"RMS total"}
-  ]);
-}
-    const rms = resp?.macro?.rms_kms ?? resp?.macro?.rms ?? '—';
-    setResults([{obj: galaxy_name, rms, detail:'compute'}]);
-    log(`OK compute ${galaxy_name} rms=${rms}`);
-  }catch(e){
-    log(`ERROR compute: ${e}`);
-  }
-}
-
-async function globalRMS(){
-  try{
-    if(!zipObj || !zipFiles.length) throw new Error('Cargá el dataset primero.');
-    const galaxies=[];
-    for(const it of zipFiles){
-      const txt=await it.file.async('text');
-      const galaxy_name = it.name.split('/').pop().replace(/\.(dat|csv|txt)$/i,'').replace(/_rotmod$/i,'');
-      try{
-        const {rows}=parseCurveFile(it.name, txt);
-        galaxies.push({galaxy_name, rows});
-      }catch(err){
-        log(`SKIP ${it.name}: ${err}`);
-      }
-    }
-    if(!galaxies.length) throw new Error('No hay archivos válidos en ZIP.');
-    const endpoint = (activeMode==='dwarfs') ? '/dwarfs' : '/global_rms';
-    const resp = await postJSON(endpoint, {galaxies});
-    setMicro(resp);
-
-    const block = (activeMode==='dwarfs') ? resp?.dwarfs : resp?.global;
-    const list = block?.per_galaxy || [];
-    const agg = (activeMode==='dwarfs') ? block?.dwarfs_rms_kms : block?.global_rms_kms;
-
-    const head = (activeMode==='dwarfs') ? 'ENANAS' : (activeMode==='clusters' ? 'CLUSTERS' : 'GALAXIAS');
-    const rowsOut = [{obj: head, rms: agg ?? '—', detail:`count=${block?.count ?? list.length}`}]
-      .concat(list.slice(0,25).map(x=>({obj:x.galaxy, rms:x.rms_kms, detail:''})));
-    setResults(rowsOut);
-    log(`OK ${endpoint} agg=${agg}`);
-  }catch(e){
-    log(`ERROR globalRMS: ${e}`);
-  }
-}
 
 // Micro buttons (prefer /micro)
 async function microOnly(particle){
