@@ -440,7 +440,20 @@ async function computeSelected(){
 
     const model = extractModelCurve(resp);
     renderCurve(parsed.obs, model, galaxy_name);
+// --------- resumen físico claro ----------
+const obs = parsed.obs;
+if (obs.length > 2) {
+  const center = obs[0].y.toFixed(2);
+  const mid = obs[Math.floor(obs.length/2)].y.toFixed(2);
+  const edge = obs[obs.length-1].y.toFixed(2);
 
+  setResults([
+    {obj: galaxy_name + " (Centro)", rms: center + " km/s", detail:"r mínimo"},
+    {obj: galaxy_name + " (Medio)", rms: mid + " km/s", detail:"r medio"},
+    {obj: galaxy_name + " (Borde)", rms: edge + " km/s", detail:"r máximo"},
+    {obj: galaxy_name, rms: rms + " km/s", detail:"RMS total"}
+  ]);
+}
     const rms = resp?.macro?.rms_kms ?? resp?.macro?.rms ?? '—';
     setResults([{obj: galaxy_name, rms, detail:'compute'}]);
     log(`OK compute ${galaxy_name} rms=${rms}`);
