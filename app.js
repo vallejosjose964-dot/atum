@@ -24,6 +24,13 @@ const backendLabel = $('backendLabel');
 const backendBaseInput = $('backendBase');
 
 const repoZipUrl = $('repoZipUrl');
+// fuerza URL absoluta al ZIP en GitHub Pages
+try{
+  const autoZip = new URL('Rotmod_LTG.zip', window.location.href).href;
+  if (repoZipUrl && (!repoZipUrl.value || repoZipUrl.value.includes('./Rotmod_LTG.zip'))) {
+    repoZipUrl.value = autoZip;
+  }
+}catch(_){}
 const btnLoadRepo = $('btnLoadRepo');
 const fileSelect = $('fileSelect');
 const btnPreview = $('btnPreview');
