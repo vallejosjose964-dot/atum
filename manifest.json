@@ -1,0 +1,13 @@
+{
+  "name": "ATUM Dataset Manifest",
+  "version": "1.1",
+  "datasets": {
+    "galaxies": {
+      "galaxies_batch_csv": "./galaxies_batch.csv"
+    },
+    "clusters": {
+      "clusters_csv": "./clusters.csv"
+    }
+  },
+  "description": "Datasets utilizados por ATUM para cálculos macro del motor THOT."
+}
