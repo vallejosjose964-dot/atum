@@ -1,0 +1,438 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ATUM · THOT Universal Engine</title>
+<meta name="description" content="ATUM · Consola de laboratorio macro + micro conectada al backend THOT.">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root{--line:#17344b;--cyan:#80e7ff;--ice:#dff7ff;--muted:#92b3c6;--ok:#8cffbb;--warn:#ffd27b;--bad:#ff8b8b;--shadow:0 0 0 1px rgba(128,231,255,.08),0 18px 60px rgba(0,0,0,.38)}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:radial-gradient(circle at top, rgba(27,88,140,.22), transparent 28%),linear-gradient(180deg,#01040a 0%, #03111a 45%, #02050b 100%);color:var(--ice);font-family:Inter,Segoe UI,Roboto,Arial,sans-serif}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.12;background-image:linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);background-size:30px 30px,30px 30px}
+.shell{max-width:1520px;margin:0 auto;padding:18px 18px 40px}
+.hero,.panel,.footer{border:1px solid var(--line);border-radius:24px;background:linear-gradient(180deg, rgba(9,18,29,.96), rgba(5,11,18,.98));box-shadow:var(--shadow)}
+.hero{padding:28px;overflow:hidden;position:relative}
+.hero::after{content:"";position:absolute;right:-120px;top:-120px;width:440px;height:440px;border-radius:50%;background:radial-gradient(circle, rgba(128,231,255,.14), transparent 60%);filter:blur(8px)}
+.hero-top{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;align-items:flex-start}
+.brand h1{margin:0;font-size:78px;line-height:.92;letter-spacing:.16em;font-weight:900;color:#f2fcff;text-shadow:0 0 24px rgba(128,231,255,.14)}
+.brand .sub{margin-top:12px;color:var(--cyan);letter-spacing:.1em;text-transform:uppercase;font-size:16px;font-weight:700}
+.hero-badges{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.badge{padding:10px 13px;border-radius:999px;border:1px solid var(--line);background:rgba(9,20,32,.88);font-size:12px;text-transform:uppercase;letter-spacing:.1em}
+.live{display:flex;align-items:center;gap:10px}
+.dot{width:12px;height:12px;border-radius:50%;background:var(--warn);box-shadow:0 0 20px currentColor}
+.dot.ok{background:var(--ok)} .dot.bad{background:var(--bad)}
+.hero-grid{display:grid;grid-template-columns:1.1fr 1fr .9fr;gap:16px;margin-top:22px}
+.tile{border:1px solid var(--line);border-radius:18px;background:linear-gradient(180deg, rgba(9,20,32,.88), rgba(6,14,23,.95));padding:18px}
+.tile h3{margin:0 0 10px;font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--cyan)}
+.tile p{margin:0 0 10px;line-height:1.64;color:#d8edf8}
+.lawbox{margin-top:12px;padding:14px 15px;border-radius:14px;border:1px solid rgba(128,231,255,.14);background:rgba(2,9,16,.75);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:14px;color:#f4fcff}
+.mini-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}
+.mini{border:1px solid var(--line);border-radius:14px;padding:12px;background:rgba(5,12,19,.92)}
+.mini .k{font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted)}
+.mini .v{margin-top:8px;font-size:20px;font-weight:900;color:#fff}
+.layout{display:grid;grid-template-columns:380px 1fr;gap:18px;margin-top:18px}
+.panel{padding:20px}
+.sticky{position:sticky;top:16px;height:fit-content}
+.section-title{font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--cyan);margin:0 0 14px;font-weight:900}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tab{border:1px solid var(--line);background:#0a1827;color:#e8faff;border-radius:14px;padding:14px 16px;font-weight:900;text-transform:uppercase;letter-spacing:.07em;cursor:pointer}
+.tab.active{background:linear-gradient(180deg,#143453,#0d2439);box-shadow:0 0 0 1px rgba(128,231,255,.12) inset}
+.mode{display:none;margin-top:18px}.mode.active{display:block}
+.label{display:block;margin:12px 0 8px;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.12em;font-weight:700}
+select,input[type="text"],input[type="url"],input[type="file"]{width:100%;border-radius:14px;border:1px solid #1b3951;background:#071523;color:#eaf9ff;padding:13px 14px;outline:none}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btnrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.btn{border:none;cursor:pointer;border-radius:14px;padding:13px 16px;background:linear-gradient(180deg,#174163,#0f2e47);color:#fff;font-weight:900;letter-spacing:.04em}
+.btn.secondary{background:linear-gradient(180deg,#172737,#0e1823)}
+.btn.ghost{background:transparent;border:1px solid var(--line)}
+.btn.warn{background:linear-gradient(180deg,#644111,#442d0b)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.note{margin-top:14px;padding:12px 14px;border-radius:14px;border:1px solid rgba(128,231,255,.12);background:rgba(5,12,20,.72);color:#cde8f6;font-size:13px;line-height:1.56}
+.summary-cards{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.card{border:1px solid var(--line);border-radius:18px;padding:15px;background:linear-gradient(180deg,#0a1725,#07121c)}
+.card .k{font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted)}
+.card .v{margin-top:10px;font-size:24px;font-weight:900;color:#fff}
+.card .s{margin-top:6px;color:#bdd9e8;font-size:13px;line-height:1.4}
+.workspace-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:16px;margin-top:16px}
+.canvasbox,.consolebox,.tablebox,.physicsbox{border:1px solid var(--line);border-radius:20px;background:linear-gradient(180deg,#06111b,#040b12);padding:16px}
+canvas{width:100%!important;height:470px!important}
+.console{height:470px;overflow:auto;white-space:pre-wrap;word-break:break-word;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.7px;line-height:1.55;color:#dff7ff}
+.tablebox{margin-top:16px;overflow:auto}
+table{width:100%;min-width:900px;border-collapse:collapse}
+th,td{padding:12px 14px;border-bottom:1px solid rgba(128,231,255,.08);text-align:left}
+th{position:sticky;top:0;background:#0b1724;color:var(--cyan);font-size:12px;text-transform:uppercase;letter-spacing:.12em}
+td{color:#e0f2fb;font-size:14px}
+.physics-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
+.physics-card{border:1px solid var(--line);border-radius:16px;background:rgba(7,14,24,.94);padding:14px}
+.physics-card .t{color:var(--cyan);font-size:12px;text-transform:uppercase;letter-spacing:.12em;font-weight:900}
+.physics-card .b{margin-top:8px;color:#d9edf8;line-height:1.58;font-size:14px}
+.footer{margin-top:18px;padding:22px;text-align:center}
+.footer .strong{font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:.08em}
+.footer .muted{margin-top:8px;color:var(--muted)}
+.footer .motto{margin-top:12px;color:var(--cyan);font-weight:900;letter-spacing:.08em}
+.tiny{font-size:12px;color:var(--muted)}
+@media (max-width:1280px){.hero-grid,.layout,.workspace-grid,.physics-grid{grid-template-columns:1fr}.summary-cards{grid-template-columns:repeat(2,1fr)}.sticky{position:relative;top:auto}}
+@media (max-width:760px){.brand h1{font-size:48px}.row2,.mini-grid,.summary-cards{grid-template-columns:1fr}canvas{height:340px!important}.console{height:340px}.shell{padding:12px}.hero,.panel,.footer{padding:16px}}
+</style>
+</head>
+<body>
+<div class="shell">
+<section class="hero">
+  <div class="hero-top">
+    <div class="brand">
+      <h1>ATUM</h1>
+      <div class="sub">Consola de laboratorio · Macro + Micro · Motor matemático THOT</div>
+    </div>
+    <div class="hero-badges">
+      <div class="badge">Sin cálculo local</div>
+      <div class="badge">Backend en vivo</div>
+      <div class="badge">Una sola constante τ</div>
+      <div class="badge live"><span id="statusDot" class="dot"></span><span id="statusText">Verificando backend…</span></div>
+    </div>
+  </div>
+
+  <div class="hero-grid">
+    <div class="tile">
+      <h3>Instrucciones de uso</h3>
+      <p>ATUM es la interfaz que presenta el cálculo físico del motor THOT. El frontend no altera el resultado: solo envía datos, recibe JSON y lo muestra con gráficos, tabla y consola técnica.</p>
+      <p><b>Macro</b>: galaxias y cúmulos. <b>Micro</b>: W boson, Z pole y muon. También se admite un CSV propio del usuario para enviarlo directo al backend.</p>
+      <div class="lawbox">Ley presentada por el backend: g(r) = G·M(r) / (r² + G·M(r)/a*)</div>
+    </div>
+    <div class="tile">
+      <h3>Muestra mínima de la física</h3>
+      <p>1. El vacío responde con una capacidad física fijada por una sola constante τ.</p>
+      <p>2. En macro, el backend usa M(r) para construir la respuesta efectiva y devolver la curva modelada frente a la observada.</p>
+      <p>3. En micro, el backend genera niveles discretos del vacío a partir de τ y compara cuál es el más cercano a la partícula objetivo.</p>
+      <p>4. El frontend solo visualiza esa salida y no reescribe ninguna magnitud.</p>
+    </div>
+    <div class="tile">
+      <h3>Estado del sistema</h3>
+      <div class="mini-grid">
+        <div class="mini"><div class="k">Backend</div><div class="v" id="healthLabel">—</div></div>
+        <div class="mini"><div class="k">Motor</div><div class="v">THOT</div></div>
+        <div class="mini"><div class="k">Macro</div><div class="v">175 + 40</div></div>
+        <div class="mini"><div class="k">Micro</div><div class="v">W · Z · μ</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="layout">
+  <aside class="panel sticky">
+    <h2 class="section-title">Panel de control</h2>
+
+    <div class="tabs">
+      <button class="tab active" data-mode="macro">Macro</button>
+      <button class="tab" data-mode="micro">Micro</button>
+    </div>
+
+    <div id="macroMode" class="mode active">
+      <label class="label">Tipo de ejecución</label>
+      <select id="macroType">
+        <option value="galaxies">Galaxias</option>
+        <option value="clusters">Clusters</option>
+      </select>
+
+      <label class="label">CSV del usuario</label>
+      <input type="file" id="csvInput" accept=".csv">
+
+      <div class="row2">
+        <div>
+          <label class="label">Endpoint</label>
+          <input type="text" id="macroEndpoint" value="/galaxies-batch" readonly>
+        </div>
+        <div>
+          <label class="label">Modo</label>
+          <input type="text" value="CSV → Backend" readonly>
+        </div>
+      </div>
+
+      <div class="btnrow">
+        <button class="btn" id="sendMacroBtn">Enviar al motor</button>
+        <button class="btn secondary" id="sampleGalaxyBtn">Muestra galaxia</button>
+        <button class="btn secondary" id="sampleClusterBtn">Muestra cluster</button>
+      </div>
+
+      <div class="note">
+        Formato esperado por backend:<br><br>
+        <b>Galaxias</b>: galaxy,r_kpc,v_obs_kms,mass_msun,rd_kpc<br>
+        <b>Clusters</b>: cluster,r_mpc,v_obs_kms,m200_msun,rs_mpc
+      </div>
+    </div>
+
+    <div id="microMode" class="mode">
+      <label class="label">Partícula</label>
+      <select id="microParticle">
+        <option value="W">W Boson</option>
+        <option value="Z">Z Pole</option>
+        <option value="MUON">Muon</option>
+      </select>
+
+      <div class="btnrow">
+        <button class="btn" id="runMicroBtn">Ejecutar micro</button>
+        <button class="btn secondary" id="runWBtn">W</button>
+        <button class="btn secondary" id="runZBtn">Z</button>
+        <button class="btn secondary" id="runMuonBtn">Muon</button>
+      </div>
+
+      <div class="note">
+        El frontend envía solo la partícula seleccionada al endpoint <b>/micro</b> y presenta el espectro devuelto por el backend.
+      </div>
+    </div>
+
+    <label class="label">Backend</label>
+    <input type="url" id="backendInput" value="https://thot-engine.onrender.com">
+
+    <div class="btnrow">
+      <button class="btn ghost" id="applyBackendBtn">Aplicar backend</button>
+      <button class="btn ghost" id="checkBackendBtn">Probar conexión</button>
+      <button class="btn ghost" id="clearConsoleBtn">Limpiar consola</button>
+    </div>
+
+    <div class="note">
+      La URL del backend queda guardada localmente en el navegador. Si cambias de servidor, no hace falta editar el código fuente.
+    </div>
+  </aside>
+
+  <div class="panel">
+    <h2 class="section-title">Resultados del motor en vivo</h2>
+    <div class="tiny">La descarga de JSON y PNG sale de la salida real ya procesada por el backend.</div>
+
+    <div class="summary-cards" style="margin-top:14px">
+      <div class="card"><div class="k">Objetivo</div><div class="v" id="cardTarget">—</div><div class="s">Primer objeto o partícula</div></div>
+      <div class="card"><div class="k">Procesados</div><div class="v" id="cardCount">—</div><div class="s">Cantidad según backend</div></div>
+      <div class="card"><div class="k">τ / nivel</div><div class="v" id="cardTau">—</div><div class="s">Constante o nivel dominante</div></div>
+      <div class="card"><div class="k">RMS global</div><div class="v" id="cardRms">—</div><div class="s">Solo si backend lo devuelve</div></div>
+      <div class="card"><div class="k">Backend</div><div class="v" id="cardBackend">THOT</div><div class="s">Fuente del cálculo</div></div>
+    </div>
+
+    <div class="btnrow">
+      <button class="btn secondary" id="downloadJsonBtn" disabled>Descargar JSON</button>
+      <button class="btn secondary" id="downloadPngBtn" disabled>Descargar PNG</button>
+      <button class="btn warn" id="copyJsonBtn" disabled>Copiar JSON</button>
+    </div>
+
+    <div class="workspace-grid">
+      <div class="canvasbox">
+        <h3 class="section-title">Gráfica principal</h3>
+        <canvas id="mainChart"></canvas>
+      </div>
+      <div class="consolebox">
+        <h3 class="section-title">Consola técnica</h3>
+        <div id="console" class="console">ATUM listo.
+Esperando ejecución…</div>
+      </div>
+    </div>
+
+    <div class="tablebox">
+      <table>
+        <thead><tr><th>Ítem</th><th>Campo</th><th>Valor</th><th>Observación</th></tr></thead>
+        <tbody id="dataTable"><tr><td>—</td><td>Sin datos</td><td>—</td><td>Ejecuta macro o micro.</td></tr></tbody>
+      </table>
+    </div>
+
+    <div class="physicsbox" style="margin-top:16px">
+      <h3 class="section-title">Muestra mínima del principio físico</h3>
+      <div class="physics-grid">
+        <div class="physics-card"><div class="t">Paso 1 · Constante única</div><div class="b">El backend fija una escala con τ y desde ahí deriva sus magnitudes efectivas. El frontend no toca esa base.</div></div>
+        <div class="physics-card"><div class="t">Paso 2 · Régimen macro</div><div class="b">Se toma una masa radial M(r), se calcula la respuesta efectiva y se devuelve una curva modelo para compararla con la observada.</div></div>
+        <div class="physics-card"><div class="t">Paso 3 · Régimen micro</div><div class="b">Se construyen niveles discretos del vacío y se marca cuál es el más cercano a la masa objetivo de W, Z o muon.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="strong">Propiedad intelectual Vallejos Jose Fabian</div>
+  <div class="muted">Este software está protegido por INPI y por copyright · Powered by THOT</div>
+  <div class="motto">Born in Argentina, created for humanity</div>
+</footer>
+</div>
+
+<script>
+const STORAGE_KEY = "atum_backend_url";
+const defaultBackend = "https://thot-engine.onrender.com";
+const state = {backend: localStorage.getItem(STORAGE_KEY) || defaultBackend, lastJson:null, chart:null};
+const $ = (id) => document.getElementById(id);
+$("backendInput").value = state.backend;
+
+function setStatus(kind, text){
+  $("statusDot").className = "dot " + (kind || "");
+  $("statusText").textContent = text;
+  $("healthLabel").textContent = text;
+}
+function setConsole(text, append=false){
+  const box = $("console");
+  box.textContent = append ? box.textContent + "\n" + text : text;
+  box.scrollTop = box.scrollHeight;
+}
+function logBlock(title, obj){
+  const body = typeof obj === "string" ? obj : JSON.stringify(obj, null, 2);
+  setConsole("[" + new Date().toLocaleTimeString("es-AR") + "] " + title + "\n" + body, true);
+}
+async function checkBackend(){
+  const base = state.backend.replace(/\/+$/,"");
+  setStatus("", "Verificando backend…");
+  try{
+    const res = await fetch(base + "/health");
+    if(!res.ok) throw new Error("HTTP " + res.status);
+    const data = await res.json();
+    setStatus("ok", "Backend activo");
+    logBlock("Health", data);
+  }catch(err){
+    setStatus("bad", "Sin conexión");
+    logBlock("Error health", String(err));
+  }
+}
+function applyBackend(){
+  state.backend = $("backendInput").value.trim().replace(/\/+$/,"") || defaultBackend;
+  localStorage.setItem(STORAGE_KEY, state.backend);
+  logBlock("Backend aplicado", state.backend);
+  checkBackend();
+}
+function updateMode(mode){
+  document.querySelectorAll(".tab").forEach(btn => btn.classList.toggle("active", btn.dataset.mode === mode));
+  $("macroMode").classList.toggle("active", mode === "macro");
+  $("microMode").classList.toggle("active", mode === "micro");
+}
+document.querySelectorAll(".tab").forEach(btn => btn.addEventListener("click", () => updateMode(btn.dataset.mode)));
+$("macroType").addEventListener("change", () => {$("macroEndpoint").value = $("macroType").value === "galaxies" ? "/galaxies-batch" : "/clusters-batch";});
+function escapeHtml(s){return s.replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");}
+function updateButtons(enabled){$("downloadJsonBtn").disabled=!enabled;$("downloadPngBtn").disabled=!enabled;$("copyJsonBtn").disabled=!enabled;}
+function updateCards(payload, mode){
+  $("cardBackend").textContent = "THOT";
+  if(mode === "micro"){
+    $("cardTarget").textContent = payload.particle || "—";
+    $("cardCount").textContent = "1";
+    $("cardTau").textContent = payload.closest_level_n ? ("n=" + payload.closest_level_n) : (payload.tau ?? "—");
+    $("cardRms").textContent = "—";
+  }else{
+    const first = payload.results && payload.results[0] ? payload.results[0] : null;
+    let target = payload.dataset || "—";
+    if(first && first.galaxy) target = first.galaxy;
+    if(first && first.cluster) target = first.cluster;
+    $("cardTarget").textContent = target;
+    $("cardCount").textContent = payload.objects_processed ?? "—";
+    $("cardTau").textContent = payload.tau ?? "—";
+    $("cardRms").textContent = payload.rms_global ?? "—";
+  }
+}
+function renderTableMicro(payload){
+  const rows = [
+    ["Micro","particle", payload.particle ?? "—", "Partícula solicitada"],
+    ["Micro","tau", payload.tau ?? "—", "Constante devuelta por backend"],
+    ["Micro","target_GeV", payload.target_GeV ?? "—", "Masa objetivo"],
+    ["Micro","predicted_GeV", payload.predicted_GeV ?? "—", "Predicción backend"],
+    ["Micro","closest_level_n", payload.closest_level_n ?? "—", "Nivel más cercano"],
+    ["Micro","abs_error_GeV", payload.abs_error_GeV ?? "—", "Error absoluto"],
+    ["Micro","rel_error", payload.rel_error ?? "—", "Error relativo"]
+  ];
+  $("dataTable").innerHTML = rows.map((r,i) => '<tr><td>'+(i+1)+'</td><td>'+escapeHtml(String(r[1]))+'</td><td>'+escapeHtml(String(r[2]))+'</td><td>'+escapeHtml(String(r[3]))+'</td></tr>').join("");
+}
+function renderTableMacro(payload){
+  const rows = [
+    ["Macro","dataset", payload.dataset ?? "—", "Dataset procesado"],
+    ["Macro","objects_processed", payload.objects_processed ?? "—", "Cantidad procesada"],
+    ["Macro","rms_global", payload.rms_global ?? "—", "RMS global"],
+    ["Macro","tau", payload.tau ?? "—", "Constante backend"],
+    ["Macro","a_star", payload.a_star ?? "—", "Parámetro devuelto por backend"]
+  ];
+  const first = payload.results && payload.results[0] ? payload.results[0] : null;
+  if(first){
+    if(first.galaxy) rows.push(["Objeto","galaxy", first.galaxy, "Primer objeto devuelto"]);
+    if(first.cluster) rows.push(["Objeto","cluster", first.cluster, "Primer objeto devuelto"]);
+    if(first.points != null) rows.push(["Objeto","points", first.points, "Puntos radiales"]);
+    if(first.rms != null) rows.push(["Objeto","rms", first.rms, "RMS del primer objeto"]);
+  }
+  $("dataTable").innerHTML = rows.map((r,i) => '<tr><td>'+(i+1)+'</td><td>'+escapeHtml(String(r[1]))+'</td><td>'+escapeHtml(String(r[2]))+'</td><td>'+escapeHtml(String(r[3]))+'</td></tr>').join("");
+}
+function destroyChart(){if(state.chart){state.chart.destroy();state.chart=null;}}
+function chartOptions(xLabel, yLabel){
+  return {responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:"#dff7ff"}},tooltip:{mode:"index",intersect:false}},interaction:{mode:"nearest",intersect:false},
+    scales:{x:{title:{display:true,text:xLabel,color:"#a8d8ef"},ticks:{color:"#cbe7f5"},grid:{color:"rgba(128,231,255,.08)"}},
+            y:{title:{display:true,text:yLabel,color:"#a8d8ef"},ticks:{color:"#cbe7f5"},grid:{color:"rgba(128,231,255,.08)"}}}};
+}
+function renderChart(config){destroyChart();state.chart = new Chart($("mainChart").getContext("2d"), config);}
+function renderMicroChart(payload){
+  const labels = payload.levels || [];
+  const energies = payload.energies_GeV || [];
+  const targetLine = labels.map(() => payload.target_GeV ?? null);
+  renderChart({type:"line",data:{labels,datasets:[
+    {label:"Espectro del vacío (GeV)",data:energies,borderColor:"#80e7ff",backgroundColor:"rgba(128,231,255,.08)",pointRadius:4,tension:0.18},
+    {label:"Objetivo (GeV)",data:targetLine,borderColor:"#ffd27b",pointRadius:0,tension:0,borderDash:[8,6]}
+  ]},options:chartOptions("Nivel","GeV")});
+}
+function renderMacroChart(payload){
+  const first = payload.results && payload.results[0] ? payload.results[0] : null;
+  if(!first){destroyChart();return;}
+  let x=[], observed=[], model=[], xLabel="Radio";
+  if(first.r_kpc){x=first.r_kpc;observed=first.v_obs||[];model=first.v_model||[];xLabel="r (kpc)";}
+  else if(first.r_mpc){x=first.r_mpc;observed=first.v_obs||[];model=first.v_model||[];xLabel="r (Mpc)";}
+  renderChart({type:"line",data:{labels:x,datasets:[
+    {label:"Observado",data:observed,borderColor:"#ffd27b",pointRadius:2.5,tension:0.2},
+    {label:"Modelo THOT",data:model,borderColor:"#80e7ff",pointRadius:2.5,tension:0.2}
+  ]},options:chartOptions(xLabel,"Velocidad (km/s)")});
+}
+async function runMicro(particle){
+  const base = state.backend.replace(/\/+$/,"");
+  setConsole("Ejecutando micro: " + particle, false);
+  try{
+    const res = await fetch(base + "/micro", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({particle})});
+    const data = await res.json();
+    state.lastJson = data;
+    updateButtons(true);
+    updateCards(data, "micro");
+    renderTableMicro(data);
+    renderMicroChart(data);
+    logBlock("Respuesta /micro", data);
+  }catch(err){logBlock("Error micro", String(err));}
+}
+async function sendMacro(file, endpoint){
+  const base = state.backend.replace(/\/+$/,"");
+  setConsole("Enviando CSV a " + endpoint, false);
+  try{
+    const form = new FormData(); form.append("file", file, file.name || "dataset.csv");
+    const res = await fetch(base + endpoint, {method:"POST", body:form});
+    const data = await res.json();
+    state.lastJson = data;
+    updateButtons(true);
+    updateCards(data, "macro");
+    renderTableMacro(data);
+    renderMacroChart(data);
+    logBlock("Respuesta " + endpoint, data);
+  }catch(err){logBlock("Error macro", String(err));}
+}
+function makeFile(name, text){return new File([text], name, {type:"text/csv"});}
+function galaxySampleCsv(){return ["galaxy,r_kpc,v_obs_kms,mass_msun,rd_kpc","DemoGalaxy,0.5,52,5.2e10,2.4","DemoGalaxy,1.0,79,5.2e10,2.4","DemoGalaxy,2.0,118,5.2e10,2.4","DemoGalaxy,3.5,142,5.2e10,2.4","DemoGalaxy,5.0,154,5.2e10,2.4","DemoGalaxy,7.0,166,5.2e10,2.4","DemoGalaxy,10.0,171,5.2e10,2.4"].join("\n");}
+function clusterSampleCsv(){return ["cluster,r_mpc,v_obs_kms,m200_msun,rs_mpc","DemoCluster,0.15,420,8.5e14,0.42","DemoCluster,0.25,560,8.5e14,0.42","DemoCluster,0.40,690,8.5e14,0.42","DemoCluster,0.65,770,8.5e14,0.42","DemoCluster,0.90,820,8.5e14,0.42","DemoCluster,1.20,850,8.5e14,0.42"].join("\n");}
+function saveJson(){if(!state.lastJson)return;const blob=new Blob([JSON.stringify(state.lastJson,null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="atum_resultado.json";a.click();URL.revokeObjectURL(a.href);}
+function savePng(){if(!state.chart)return;const a=document.createElement("a");a.href=state.chart.toBase64Image("image/png",1);a.download="atum_grafica.png";a.click();}
+async function copyJson(){if(!state.lastJson)return;await navigator.clipboard.writeText(JSON.stringify(state.lastJson,null,2));logBlock("JSON","Copiado al portapapeles");}
+
+$("sendMacroBtn").addEventListener("click", () => {
+  const file = $("csvInput").files[0];
+  if(!file){logBlock("Aviso","Falta seleccionar CSV.");return;}
+  const endpoint = $("macroType").value === "galaxies" ? "/galaxies-batch" : "/clusters-batch";
+  sendMacro(file, endpoint);
+});
+$("sampleGalaxyBtn").addEventListener("click", () => {$("macroType").value="galaxies";$("macroEndpoint").value="/galaxies-batch";sendMacro(makeFile("muestra_galaxia.csv", galaxySampleCsv()), "/galaxies-batch");});
+$("sampleClusterBtn").addEventListener("click", () => {$("macroType").value="clusters";$("macroEndpoint").value="/clusters-batch";sendMacro(makeFile("muestra_cluster.csv", clusterSampleCsv()), "/clusters-batch");});
+$("runMicroBtn").addEventListener("click", () => runMicro($("microParticle").value));
+$("runWBtn").addEventListener("click", () => runMicro("W"));
+$("runZBtn").addEventListener("click", () => runMicro("Z"));
+$("runMuonBtn").addEventListener("click", () => runMicro("MUON"));
+$("applyBackendBtn").addEventListener("click", applyBackend);
+$("checkBackendBtn").addEventListener("click", checkBackend);
+$("clearConsoleBtn").addEventListener("click", () => setConsole("Consola limpiada.", false));
+$("downloadJsonBtn").addEventListener("click", saveJson);
+$("downloadPngBtn").addEventListener("click", savePng);
+$("copyJsonBtn").addEventListener("click", copyJson);
+
+updateButtons(false);
+checkBackend();
+</script>
+</body>
+</html>
