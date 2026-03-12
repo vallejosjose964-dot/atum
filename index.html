@@ -254,6 +254,25 @@ Esperando ejecución…</div>
 
 <script>
 const STORAGE_KEY = "atum_backend_url";
+  let ATUM_MANIFEST = null;
+
+async function loadManifest(){
+
+  try{
+
+    const res = await fetch("./manifest.json");
+
+    ATUM_MANIFEST = await res.json();
+
+    console.log("ATUM manifest cargado", ATUM_MANIFEST);
+
+  }catch(e){
+
+    console.warn("Manifest no encontrado", e);
+
+  }
+
+}
 const defaultBackend = "https://thot-engine.onrender.com";
 const state = {backend: localStorage.getItem(STORAGE_KEY) || defaultBackend, lastJson:null, chart:null};
 const $ = (id) => document.getElementById(id);
@@ -411,7 +430,38 @@ function clusterSampleCsv(){return ["cluster,r_mpc,v_obs_kms,m200_msun,rs_mpc","
 function saveJson(){if(!state.lastJson)return;const blob=new Blob([JSON.stringify(state.lastJson,null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="atum_resultado.json";a.click();URL.revokeObjectURL(a.href);}
 function savePng(){if(!state.chart)return;const a=document.createElement("a");a.href=state.chart.toBase64Image("image/png",1);a.download="atum_grafica.png";a.click();}
 async function copyJson(){if(!state.lastJson)return;await navigator.clipboard.writeText(JSON.stringify(state.lastJson,null,2));logBlock("JSON","Copiado al portapapeles");}
+async function runDatasetFromManifest(type){
 
+  if(!ATUM_MANIFEST){
+
+    alert("Manifest no cargado");
+    return;
+
+  }
+
+  let path;
+
+  if(type === "galaxies"){
+    path = ATUM_MANIFEST.datasets.galaxies.galaxies_batch_csv;
+  }
+
+  if(type === "clusters"){
+    path = ATUM_MANIFEST.datasets.clusters.clusters_csv;
+  }
+
+  const r = await fetch(path);
+
+  const text = await r.text();
+
+  const file = new File([text], path, {type:"text/csv"});
+
+  const endpoint = type === "galaxies"
+    ? "/galaxies-batch"
+    : "/clusters-batch";
+
+  sendMacro(file, endpoint);
+
+}
 $("sendMacroBtn").addEventListener("click", () => {
   const file = $("csvInput").files[0];
   if(!file){logBlock("Aviso","Falta seleccionar CSV.");return;}
@@ -430,9 +480,20 @@ $("clearConsoleBtn").addEventListener("click", () => setConsole("Consola limpiad
 $("downloadJsonBtn").addEventListener("click", saveJson);
 $("downloadPngBtn").addEventListener("click", savePng);
 $("copyJsonBtn").addEventListener("click", copyJson);
+$("runMicroBtn").addEventListener("click", () => runMicro($("microParticle").value));
+$("runWBtn").addEventListener("click", () => runMicro("W"));
+$("runZBtn").addEventListener("click", () => runMicro("Z"));
+$("runMuonBtn").addEventListener("click", () => runMicro("MUON"));
+$("applyBackendBtn").addEventListener("click", applyBackend);
+$("checkBackendBtn").addEventListener("click", checkBackend);
+$("clearConsoleBtn").addEventListener("click", () => setConsole("Consola limpiada.", false));
+$("downloadJsonBtn").addEventListener("click", saveJson);
+$("downloadPngBtn").addEventListener("click", savePng);
+$("copyJsonBtn").addEventListener("click", copyJson);
 
 updateButtons(false);
 checkBackend();
+loadManifest();
 </script>
 </body>
 </html>
