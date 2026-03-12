@@ -302,6 +302,7 @@ Esperando ejecución…</div>
 
 <script>
 const STORAGE_KEY = "atum_backend_url";
+  const DEFAULT_BACKEND = "https://atum-engine.onrender.com";
   let galaxyDataset = [];
 
 async function loadGalaxyList(){
@@ -389,6 +390,9 @@ function applyBackend(){
   localStorage.setItem(STORAGE_KEY, state.backend);
   logBlock("Backend aplicado", state.backend);
   checkBackend();
+}
+  function backendBase(){
+  return localStorage.getItem(STORAGE_KEY) || DEFAULT_BACKEND;
 }
 function updateMode(mode){
   document.querySelectorAll(".tab").forEach(btn => btn.classList.toggle("active", btn.dataset.mode === mode));
