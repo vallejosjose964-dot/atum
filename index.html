@@ -829,7 +829,8 @@
       }catch(err){
         state.macroResult = null;
         const msg = String(err.message || err);
-        el.jsonOutput.textContent = "Error macro:\n" + msg;
+        console.log("Respuesta cruda del backend:", data);
+        el.jsonOutput.textContent = JSON.stringify(data, null, 2);
         showFatal(msg);
         syncButtons();
       }
